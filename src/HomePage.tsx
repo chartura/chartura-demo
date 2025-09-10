@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
- * Chartura Homepage — Premium, Clean, and Complete (Rev 17)
- * Single-file TSX: all sections restored (Hero, How, Why, Try It w/ Charts + Askura + Import gating, Insights, Slides).
- * Notes:
- * - Styling assumes TailwindCSS; falls back gracefully if absent.
- * - PNG export works in-browser (svg -> canvas -> png).
- * - CSV import demo; XLSX is for production (e.g., SheetJS).
- * - Askura can call OpenAI if you provide an API key (live site only); sandbox may block network.
+ * Chartura Homepage — Rev 19
+ * - Askura now ALWAYS calls your serverless route `/api/askura`
+ * - Removed “Use AI” checkbox and API key field
+ * - Keeps a local fallback if the backend is unavailable
+ * - Everything else unchanged from Rev 18
  */
 
 /* =========================
@@ -83,7 +81,7 @@ function buildSeries(rows: Row[], yA: MetricKey, yB?: MetricKey): Pt[] {
 }
 
 /* =========================
-   Themed Button (hover uses brightness)
+   Themed Button
    ========================= */
 function ThemedButton({ color, children, onClick, className='', textClass='' }:
   { color:string; children: React.ReactNode; onClick?:()=>void; className?:string; textClass?:string }){
@@ -99,15 +97,15 @@ function ThemedButton({ color, children, onClick, className='', textClass='' }:
 }
 
 /* =========================
-   PremiumChart (SVG, no deps)
+   PremiumChart (SVG)
    ========================= */
 function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabelRight, showGrid=true, pointSize=6, useRightAxis=false, onRef }:{
   series: Pt[]; mode: Mode; colorA: string; colorB: string; xLabel:string; yLabelLeft:string; yLabelRight?:string; showGrid?:boolean; pointSize?:number; useRightAxis?:boolean; onRef?: (el:SVGSVGElement|null)=>void;
 }){
   const width=860, height=440, padL=90, padR=90, padT=28, padB=86;
   const plotW = width - padL - padR, plotH = height - padT - padB;
-  const xs = (i:number)=> padL + (series.length<=1? plotW/2 : (i)*(plotW/(series.length-1))); // line/scatter
-  const xsBar = (i:number)=> padL + (plotW/series.length)*(i+0.5); // bar centers
+  const xs = (i:number)=> padL + (series.length<=1? plotW/2 : (i)*(plotW/(series.length-1)));
+  const xsBar = (i:number)=> padL + (plotW/series.length)*(i+0.5);
 
   const aMin = Math.min(0, ...series.map(p=>p.a)); const aMax = Math.max(1, ...series.map(p=>p.a));
   const bVals = series.map(p=> p.b??0); const bMin = Math.min(0, ...bVals); const bMax = Math.max(1, ...bVals);
@@ -131,17 +129,13 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
 
   const barBand = series.length? plotW / series.length : 0; const barW = Math.max(16, Math.min(42, barBand*0.6));
 
-  // PIE helpers
   const totalA = series.reduce((s,p)=> s+p.a, 0);
-
-  // Legend items for pie
   const legendItems = series.map((p,i)=> ({ label: p.label, color: i%2? colorB: colorA }));
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow border">
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} className="w-full h-[440px]">
         <rect x={0} y={0} width={width} height={height} rx={12} fill="white" />
-
         {mode!=='pie' && showGrid && (
           <g stroke="#E5E7EB" strokeDasharray="4 6">
             <line x1={padL} y1={height-padB} x2={width-padR} y2={height-padB}/>
@@ -149,8 +143,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             {[0.25,0.5,0.75].map((p,i)=> (<line key={i} x1={padL} y1={padT+plotH*p} x2={width-padR} y2={padT+plotH*p}/>))}
           </g>
         )}
-
-        {/* X labels (non-pie) */}
         {mode!=='pie' && (
           <g fontSize={14} fill="#6B7280">
             {series.map((p,i)=>(
@@ -161,8 +153,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             ))}
           </g>
         )}
-
-        {/* Y labels left (non-pie) */}
         {mode!=='pie' && (
           <g fontSize={14} fill="#6B7280">
             {[0,0.5,1].map((t,i)=>{ const v=aMin + t*(aMax-aMin); return (
@@ -173,8 +163,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             );})}
           </g>
         )}
-
-        {/* Right axis (optional) */}
         {mode!=='pie' && useRightAxis && series.some(p=>p.b!=null) && (
           <g fontSize={14} fill="#6B7280">
             {[0,0.5,1].map((t,i)=>{ const v=bMin + t*(bMax-bMin); return (
@@ -185,46 +173,39 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             );})}
           </g>
         )}
-
-        {/* Renderers */}
         {mode==='area' && (
           <g>
             <path d={pathFor(series.map(p=>p.a), ysA)} fill="none" stroke={colorA} strokeWidth={3}/>
             <path d={`${pathFor(series.map(p=>p.a), ysA)} L ${xs(series.length-1)} ${height-padB} L ${xs(0)} ${height-padB} Z`} fill={colorA} opacity={0.12}/>
-            {series.map((p,i)=> (<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
+            {series.map((p,i)=>(<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
             {series.some(p=>p.b!=null) && (<>
               <path d={pathFor(series.map(p=>p.b||0), ysB)} fill="none" stroke={colorB} strokeWidth={3}/>
-              {series.map((p,i)=> (<circle key={`ba${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={4} fill={colorB}/>))}
+              {series.map((p,i)=>(<circle key={`ba${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={4} fill={colorB}/>))}
             </>)}
           </g>
         )}
-
         {mode==='line' && (
           <g>
             <path d={pathFor(series.map(p=>p.a), ysA)} fill="none" stroke={colorA} strokeWidth={3}/>
-            {series.map((p,i)=> (<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
+            {series.map((p,i)=>(<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
             {series.some(p=>p.b!=null) && (<>
               <path d={pathFor(series.map(p=>p.b||0), ysB)} fill="none" stroke={colorB} strokeWidth={3}/>
-              {series.map((p,i)=> (<circle key={`b${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={4} fill={colorB}/>))}
+              {series.map((p,i)=>(<circle key={`b${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={4} fill={colorB}/>))}
             </>)}
           </g>
         )}
-
         {mode==='dual' && (
           <g>
-            {/* A line (left or shared axis) */}
             <path d={pathFor(series.map(p=>p.a), ysA)} fill="none" stroke={colorA} strokeWidth={3}/>
-            {series.map((p,i)=> (<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
-            {/* B bars (right or shared axis) */}
+            {series.map((p,i)=>(<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={4} fill={colorA}/>))}
             {series.some(p=>p.b!=null) && series.map((p,i)=>{ const x = xs(i) - 12; const y = ysB(Math.max(0,p.b||0)); const h=(height-padB)-y; return (
               <rect key={`bbar${i}`} x={x} y={y} width={24} height={h} rx={6} fill={colorB}/>
             );})}
           </g>
         )}
-
         {mode==='bar' && (
           <g>
-            {series.map((p,i)=>{ const cx = xsBar(i); const x = cx - barW/2; const y = ysA(p.a); const h = (height-padB) - y; return (
+            {series.map((p,i)=>{ const cx = xsBar(i); const barW = 28; const x = cx - barW/2; const y = ysA(p.a); const h = (height-padB) - y; return (
               <g key={i}>
                 <rect x={x} y={y} width={barW} height={h} rx={8} fill={colorA}/>
                 {p.b!=null && (()=>{ const y2 = ysB(p.b||0); const h2 = (height-padB)-y2; return (<rect x={x} y={y2} width={barW} height={h2} rx={8} fill={colorB} opacity={0.55}/>); })()}
@@ -233,18 +214,17 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             );})}
           </g>
         )}
-
         {mode==='scatter' && (
           <g>
-            {series.map((p,i)=> (<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={Math.max(3,Math.min(14,pointSize))} fill={colorA}/>))}
-            {series.some(p=>p.b!=null) && series.map((p,i)=> (<circle key={`sc${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={Math.max(3,Math.min(14,pointSize))} fill={colorB} opacity={0.85}/>))}
+            {series.map((p,i)=>(<circle key={i} cx={xs(i)} cy={ysA(p.a)} r={Math.max(3,Math.min(14,pointSize))} fill={colorA}/>))}
+            {series.some(p=>p.b!=null) && series.map((p,i)=>(<circle key={`sc${i}`} cx={xs(i)} cy={ysB(p.b||0)} r={Math.max(3,Math.min(14,pointSize))} fill={colorB} opacity={0.85}/>))}
           </g>
         )}
-
         {mode==='pie' && (
           <g>
-            {(()=>{ const cx = width/2, cy = height/2+10, R = Math.min(plotW, plotH)/2.0; let start=-90; return series.map((p,i)=>{
-              const ang = totalA? (p.a/totalA)*360 : 0;
+            {(()=>{ const cx = width/2, cy = height/2+10, R = Math.min((width-180), (height-114))/2.0; let start=-90; return series.map((p,i)=>{
+              const totalA = series.reduce((s,q)=> s+q.a, 0) || 1;
+              const ang = (p.a/totalA)*360;
               const end=start+ang; const large = ang>180?1:0;
               const x1=cx+R*Math.cos((start*Math.PI)/180), y1=cy+R*Math.sin((start*Math.PI)/180);
               const x2=cx+R*Math.cos((end*Math.PI)/180),   y2=cy+R*Math.sin((end*Math.PI)/180);
@@ -252,7 +232,7 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
               const lx=cx+(R*0.62)*Math.cos((mid*Math.PI)/180), ly=cy+(R*0.62)*Math.sin((mid*Math.PI)/180);
               start=end;
               const fill = i%2? colorB: colorA;
-              const pctTxt = totalA? Math.round((p.a/totalA)*100)+'%':'';
+              const pctTxt = Math.round((p.a/totalA)*100)+'%';
               return (
                 <g key={i}>
                   <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${R} ${R} 0 ${large} 1 ${x2} ${y2} Z`} fill={fill} opacity={0.9}/>
@@ -262,8 +242,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
             }); })()}
           </g>
         )}
-
-        {/* axis labels */}
         {mode!=='pie' && (<>
           <text x={(padL+width-padR)/2} y={height-18} textAnchor="middle" fontSize={15} fill="#374151">{xLabel}</text>
           <text x={24} y={(padT+height-padB)/2} textAnchor="middle" fontSize={15} fill="#374151" transform={`rotate(-90 24 ${(padT+height-padB)/2})`}>{yLabelLeft}</text>
@@ -273,7 +251,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
         </>)}
       </svg>
 
-      {/* Legend (pie only) */}
       {mode==='pie' && (
         <div className="flex flex-wrap gap-3 mt-3 text-sm">
           {legendItems.map((it,i)=> (
@@ -338,24 +315,27 @@ function DataGrid({ rows, setRows, color }:{ rows: Row[]; setRows:(r:Row[])=>voi
 }
 
 /* =========================
-   Askura (with optional OpenAI backend)
+   Askura (BACKEND FIRST, local fallback)
    ========================= */
 interface AskuraMemory { kind?: 'topSupplier'|'marginMax'|'growth'|'total'|'min'|'max'; metric?: MetricKey|'margin'; year?: string; years?: string[]; supplier?: string; value?: number }
 
-async function askOpenAI(apiKey:string, prompt:string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?:MetricKey;secondaryOn:boolean}): Promise<string>{
-  const sys = `You are Askura, a precise data analyst. The user provides a small table (columns: period, revenue, units, supplier, costPrice, staffExp). Use the numbers to answer crisply; include units or years where helpful.`;
-  const content = JSON.stringify({ question: prompt, rows, context });
-  try{
-    const res = await fetch('https://api.openai.com/v1/chat/completions',{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${apiKey}` },
-      body: JSON.stringify({ model:'gpt-4o-mini', messages:[{role:'system', content:sys},{role:'user', content}], temperature:0.2 })
+async function askOpenAI(
+  _apiKey: string, // not used anymore
+  prompt: string,
+  rows: Row[],
+  context:{mode:Mode;yA:MetricKey;yB?:MetricKey;secondaryOn:boolean}
+): Promise<string>{
+  try {
+    const res = await fetch('/api/askura', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ question: prompt, rows, context })
     });
-    if(!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? 'No answer.';
-  }catch(e:any){
-    return 'AI backend is unavailable in this demo environment. Using built-in logic instead.';
+    return data.answer || 'No answer.';
+  } catch {
+    return 'Askura server unavailable.';
   }
 }
 
@@ -363,12 +343,11 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
   const text = q.trim().toLowerCase();
   if(!text) return { text:'Ask about revenue, units, suppliers, costs, margin, growth, or years (e.g., "revenue growth 2024 to 2025").', mem };
 
-  // small talk
   if(/^(thanks|thank you|cheers|ok|okay|cool|great|nice|awesome|got it|good)\b/.test(text)){
     return { text: mem.kind? 'Anytime — want me to break that down further or compare years?' : 'Anytime — ask me anything about the table.', mem };
   }
 
-  const yearsInQ = Array.from(new Set((text.match(/\b20\d{2}\b/g) || [])));
+  const yearsInQ = Array.from(new Set((text.match(/\b(20\d{2})\b/g) || [])));
   const suppliers = Array.from(new Set(rows.map(r=> r.supplier.toLowerCase())));
   const mentionedSupplier = suppliers.find(s => text.includes(s));
   const byFilter = rows.filter(r=> (yearsInQ.length? yearsInQ.includes(r.period): true) && (mentionedSupplier? r.supplier.toLowerCase()===mentionedSupplier: true));
@@ -380,14 +359,12 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
   const staff = sum(byFilter, r=> r.staffExp);
   const margin = rev - cost - staff;
 
-  // follow-up: when was this?
   if(/^(when\??|when was this\??|which year\??|what year\??)$/.test(text)){
     if(mem.year) return { text: `It was in ${mem.year}.`, mem };
     return { text: 'I need a reference. Ask a specific question first (e.g., lowest cost price).', mem };
   }
 
-  // chart context
-  if(/what\s+am\s+i\s+looking|what\s+does\s+this\s+chart|which\s+metrics\s+are\s+shown/.test(text)){
+  if(/what\s+does\s+this\s+chart|which\s+metrics\s+are\s+shown/.test(text)){
     const primary = METRIC_LABEL[context.yA];
     const secondary = context.secondaryOn && context.yB ? ` and ${METRIC_LABEL[context.yB]}` : '';
     return { text:`The chart is a ${context.mode} showing ${primary}${secondary} by Year.`, mem };
@@ -403,51 +380,51 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
     });
     if(!bySup.size) return { text:'No rows match that filter.', mem };
     const metric = /margin/.test(text)? 'margin' : /unit/.test(text)? 'units' : 'rev';
-const sorted = Array.from(bySup.entries()).sort(
-  (a, b) => (b[1] as any)[metric] - (a[1] as any)[metric]
-);
-if (sorted.length === 0) return { text: 'No data.', mem };
-const [name, vals] = sorted[0]!;
+    const sorted = Array.from(bySup.entries()).sort(
+      (a, b) => (b[1] as any)[metric] - (a[1] as any)[metric]
+    );
+    if (sorted.length === 0) return { text: 'No data.', mem };
+    const [name, vals] = sorted[0]!;
     const label = metric==='rev'?'revenue':metric;
     const newMem: AskuraMemory = { kind:'topSupplier', supplier:name, metric: metric==='rev'?'revenue': metric as any, year: yearsInQ[0], years: yearsInQ };
-    return { text:`Top supplier by ${label}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${name} (${Math.round(vals[metric as 'rev'|'units'|'margin'])}).`, mem:newMem };
+    return { text:`Top supplier by ${label}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${name} (${Math.round((vals as any)[metric])}).`, mem:newMem };
   }
 
   // biggest margin (by year across all suppliers)
-if (/biggest\s+margin|highest\s+margin/.test(text)) {
-  const byYear = new Map<string, number>();
-  for (const r of rows) {
-    const m = r.revenue - r.costPrice * r.units - r.staffExp;
-    byYear.set(r.period, (byYear.get(r.period) || 0) + m);
+  if (/biggest\s+margin|highest\s+margin/.test(text)) {
+    const byYear = new Map<string, number>();
+    for (const r of rows) {
+      const m = r.revenue - r.costPrice * r.units - r.staffExp;
+      byYear.set(r.period, (byYear.get(r.period) || 0) + m);
+    }
+    const sorted = Array.from(byYear.entries()).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return { text: 'No data.', mem };
+    const [year, val] = sorted[0]!;
+    const newMem: AskuraMemory = { kind: 'marginMax', year, metric: 'margin', value: val };
+    return { text: `Highest margin year: ${year} (~${Math.round(val)}).`, mem: newMem };
   }
-  const sorted = Array.from(byYear.entries()).sort((a, b) => b[1] - a[1]);
-  if (sorted.length === 0) return { text: 'No data.', mem };
-  const [year, val] = sorted[0]!;
-  const newMem: AskuraMemory = { kind: 'marginMax', year, metric: 'margin', value: val };
-  return { text: `Highest margin year: ${year} (~${Math.round(val)}).`, mem: newMem };
-}
 
-  // lowest / highest cost price (per year)
-if (/(lowest|min).*cost|cost\s*price.*(lowest|min)/.test(text)) {
-  let best: { year: string; val: number } | undefined;
-  for (const r of rows) {
-    if (!best || r.costPrice < best.val) best = { year: r.period, val: r.costPrice };
+  // lowest / highest cost price
+  if (/(lowest|min).*cost|cost\s*price.*(lowest|min)/.test(text)) {
+    let best: { year: string; val: number } | undefined;
+    for (const r of rows) {
+      if (!best || r.costPrice < best.val) best = { year: r.period, val: r.costPrice };
+    }
+    if (!best) return { text: 'No data.', mem };
+    const newMem: AskuraMemory = { kind: 'min', metric: 'costPrice', year: best.year, value: best.val };
+    return { text: `Lowest cost price: ${best.val.toFixed(2)} in ${best.year}.`, mem: newMem };
   }
-  if (!best) return { text: 'No data.', mem };
-  const newMem: AskuraMemory = { kind: 'min', metric: 'costPrice', year: best.year, value: best.val };
-  return { text: `Lowest cost price: ${best.val.toFixed(2)} in ${best.year}.`, mem: newMem };
-}
-if (/(highest|max).*cost|cost\s*price.*(highest|max)/.test(text)) {
-  let best: { year: string; val: number } | undefined;
-  for (const r of rows) {
-    if (!best || r.costPrice > best.val) best = { year: r.period, val: r.costPrice };
+  if (/(highest|max).*cost|cost\s*price.*(highest|max)/.test(text)) {
+    let best: { year: string; val: number } | undefined;
+    for (const r of rows) {
+      if (!best || r.costPrice > best.val) best = { year: r.period, val: r.costPrice };
+    }
+    if (!best) return { text: 'No data.', mem };
+    const newMem: AskuraMemory = { kind: 'max', metric: 'costPrice', year: best.year, value: best.val };
+    return { text: `Highest cost price: ${best.val.toFixed(2)} in ${best.year}.`, mem: newMem };
   }
-  if (!best) return { text: 'No data.', mem };
-  const newMem: AskuraMemory = { kind: 'max', metric: 'costPrice', year: best.year, value: best.val };
-  return { text: `Highest cost price: ${best.val.toFixed(2)} in ${best.year}.`, mem: newMem };
-}
 
-  // growth or difference between two years
+  // growth/delta between two years
   const yMatches = text.match(/(20\d{2}).*(20\d{2})/);
   if(/growth|change|delta|increase|decrease/.test(text) && yMatches){
     const y1=yMatches[1], y2=yMatches[2];
@@ -459,7 +436,6 @@ if (/(highest|max).*cost|cost\s*price.*(highest|max)/.test(text)) {
     return { text:`${metric==='margin'?'Margin':METRIC_LABEL[metric]} changed ${Math.round(pct(v2,v1))}% from ${y1} (${Math.round(v1)}) to ${y2} (${Math.round(v2)}).`, mem:newMem };
   }
 
-  // totals / averages intent
   if(/average|avg/.test(text)){
     const metric: MetricKey| 'margin' = /margin/.test(text)? 'margin' : /unit/.test(text)? 'units' : /revenue|sales(?!\s*units)/.test(text)? 'revenue' : /staff/.test(text)? 'staffExp' : /cost/.test(text)? 'costPrice' : 'revenue';
     const val = metric==='margin' ? (margin/ (byFilter.length||1)) : (sum(byFilter, r=> (metric==='costPrice'? r.costPrice : (r[metric] as number))) / (metric==='costPrice'? (byFilter.length||1) : 1));
@@ -467,21 +443,17 @@ if (/(highest|max).*cost|cost\s*price.*(highest|max)/.test(text)) {
     return { text:`Average ${metric==='margin'?'margin':METRIC_LABEL[metric]}${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${metric==='costPrice'? val.toFixed(2) : Math.round(val)}.`, mem:newMem };
   }
 
-  // single metric totals (default fallbacks)
   if(/revenue|sales(?!\s*units)/.test(text)) return { text:`Revenue${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${Math.round(rev)}.`, mem:{...mem, kind:'total', metric:'revenue', value:rev} };
   if(/unit|quantity|qty/.test(text)) return { text:`Units${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${Math.round(units)}.`, mem:{...mem, kind:'total', metric:'units', value:units} };
   if(/staff/.test(text)) return { text:`Staff expenses${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${Math.round(staff)}.`, mem:{...mem, kind:'total', metric:'staffExp', value:staff} };
   if(/margin|profit/.test(text)) return { text:`Margin${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${Math.round(margin)} (approx).`, mem:{...mem, kind:'marginMax', metric:'margin', value:margin} };
   if(/cost(\s*price)?/.test(text)) return { text:`Average cost price${mentionedSupplier?` for ${mentionedSupplier}`:''}${yearsInQ.length?` in ${yearsInQ.join(', ')}`:''}: ${(sum(byFilter, r=> r.costPrice)/ (byFilter.length||1)).toFixed(2)}.`, mem:{...mem, kind:'total', metric:'costPrice'} };
 
-  // fallback suggestion
   return { text:'Try: "Top supplier by revenue", "Revenue growth 2024 to 2025", or "What does this chart show?"', mem };
 }
 
 function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:MetricKey;yB?:MetricKey;secondaryOn:boolean}; color:string }){
   const [memory, setMemory] = useState<AskuraMemory>({});
-  const [useAI, setUseAI] = useState(false);
-  const [apiKey, setApiKey] = useState('');
   const seed = answerLocal('Which supplier drove most units in 2025?', rows, context, {});
   const [messages, setMessages] = useState<{role:'user'|'ai'; text:string}[]>([
     { role:'user', text:'Which supplier drove most units in 2025?' },
@@ -495,11 +467,14 @@ function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:Me
     if(!input.trim()) return;
     const q=input; setInput('');
     setMessages(m=>[...m,{role:'user', text:q}]);
-    if(useAI && apiKey){
-      const ai = await askOpenAI(apiKey, q, rows, context);
+
+    // Try backend first
+    const ai = await askOpenAI('', q, rows, context);
+    if (ai !== 'Askura server unavailable.') {
       setMessages(m=>[...m,{role:'ai', text: ai}]);
       const resLocal = answerLocal(q, rows, context, memory); setMemory(resLocal.mem);
     } else {
+      // Fallback to local logic
       const res = answerLocal(q, rows, context, memory);
       setMessages(m=>[...m,{role:'ai', text: res.text}]);
       setMemory(res.mem);
@@ -510,11 +485,7 @@ function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:Me
     <div className="rounded-2xl bg-gray-50 border p-4">
       <div className="mb-2">
         <div className="text-sm font-semibold">Askura — Ask your data</div>
-        <div className="text-xs text-gray-600">Natural language questions about the table. Follow‑ups like “when was this?” work too.</div>
-      </div>
-      <div className="flex items-center gap-2 mb-2 text-xs">
-        <label className="inline-flex items-center gap-1"><input type="checkbox" checked={useAI} onChange={e=>setUseAI(e.target.checked)} /> Use OpenAI*</label>
-        {useAI && <input value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="Enter API key" className="border rounded px-2 py-1 flex-1" />}
+        <div className="text-xs text-gray-600">Natural language questions about the table. Follow-ups like “when was this?” work too.</div>
       </div>
       <div className="h-56 overflow-y-auto space-y-2 mb-2" ref={chatRef}>
         {messages.map((m,i)=> (
@@ -525,7 +496,6 @@ function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:Me
         <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=> e.key==='Enter' && send()} className="flex-1 border rounded-lg px-3 py-2" placeholder="Ask about your data..."/>
         <ThemedButton color={color} onClick={send}>Send</ThemedButton>
       </div>
-      <div className="mt-1 text-[10px] text-gray-500">*For the live site only. This sandbox may block network calls. If disabled, Askura uses local logic.</div>
     </div>
   );
 }
@@ -561,26 +531,6 @@ function computeInsights(rows: Row[]) {
   return { bullets, actions, risks };
 }
 
-function InsightsMiniReal({ rows }:{ rows: Row[] }){
-  const { bullets, actions, risks } = computeInsights(rows);
-  return (
-    <div className="grid grid-cols-3 gap-2 text-left text-[11px] w-full">
-      <div className="bg-white/10 p-2 rounded">
-        <div className="font-semibold mb-1">Takeaways</div>
-        {bullets.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
-      </div>
-      <div className="bg-white/10 p-2 rounded">
-        <div className="font-semibold mb-1">Actions</div>
-        {actions.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
-      </div>
-      <div className="bg-white/10 p-2 rounded">
-        <div className="font-semibold mb-1">Risks</div>
-        {risks.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
-      </div>
-    </div>
-  );
-}
-
 function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
   const { bullets, actions, risks } = computeInsights(rows);
   const Card = ({ title, icon, children }:{ title:string; icon: React.ReactNode; children: React.ReactNode }) => (
@@ -605,7 +555,7 @@ function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
           </Card>
         </div>
       </div>
-      {gated && <div className="max-w-6xl mx-auto -mt-10 mb-8 text-center"><div className="inline-block bg_WHITE/90 backdrop-blur rounded-xl px-6 py-3 shadow border">Start a free trial to unlock Insights for imported files.</div></div>}
+      {gated && <div className="max-w-6xl mx-auto -mt-10 mb-8 text-center"><div className="inline-block bg-white/90 backdrop-blur rounded-xl px-6 py-3 shadow border">Start a free trial to unlock Insights for imported files.</div></div>}
     </section>
   );
 }
@@ -618,7 +568,6 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
   const wrap = (n:number, len:number)=> (n+len)%len;
   useEffect(()=>{ const id=setInterval(()=> setI(v=>wrap(v+1,3)), 6000); return ()=>clearInterval(id); },[]);
 
-  // mini chart svg based on rows (units)
   const maxU = Math.max(...rows.map(x=>x.units));
   const miniPts = rows.map((r,idx)=> [20+idx*(280/(rows.length-1||1)), 150 - (r.units/maxU)*110] as [number,number]);
   const miniPath = miniPts.length? `M ${miniPts[0][0]} ${miniPts[0][1]} ` + miniPts.slice(1).map(p=>`L ${p[0]} ${p[1]}`).join(' ') : '';
@@ -656,11 +605,11 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
           <div className="text-sm opacity-90 mb-3">{s.d}</div>
           <div className="min-h-[184px] flex items-center justify-center">{s.c}</div>
           <div className="mt-3 flex items-center justify-center gap-3">
-            <button onClick={()=>setI(v=>wrap(v-1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg_WHITE/30">‹</button>
+            <button onClick={()=>setI(v=>wrap(v-1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">‹</button>
             {items.map((_,idx)=> (
               <button key={idx} onClick={()=>setI(idx)} className={`w-2.5 h-2.5 rounded-full ${idx===i? 'bg-white':'bg-white/40'}`} />
             ))}
-            <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg_WHITE/20 hover:bg_WHITE/30">›</button>
+            <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">›</button>
           </div>
         </div>
       </div>
@@ -668,10 +617,30 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
   );
 }
 
+function InsightsMiniReal({ rows }:{ rows: Row[] }){
+  const { bullets, actions, risks } = computeInsights(rows);
+  return (
+    <div className="grid grid-cols-3 gap-2 text-left text-[11px] w-full">
+      <div className="bg-white/10 p-2 rounded">
+        <div className="font-semibold mb-1">Takeaways</div>
+        {bullets.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
+      </div>
+      <div className="bg-white/10 p-2 rounded">
+        <div className="font-semibold mb-1">Actions</div>
+        {actions.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
+      </div>
+      <div className="bg-white/10 p-2 rounded">
+        <div className="font-semibold mb-1">Risks</div>
+        {risks.slice(0,2).map((b,i)=> (<div key={i} className="opacity-90">• {b}</div>))}
+      </div>
+    </div>
+  );
+}
+
 function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
   const steps = [
     { title:'Bring your data', desc:'Drag Excel/CSV, paste a table or upload a doc.', icon:'📥' },
-    { title:'See it, beautifully', desc:'On‑brand visuals: line, bar, dual, pie.', icon:'📊' },
+    { title:'See it, beautifully', desc:'On-brand visuals: line, bar, dual, pie.', icon:'📊' },
     { title:'Ask anything', desc:'Askura answers natural language about your data.', icon:'🤖' },
     { title:'Actionable insights', desc:'Drivers, risks and actions — automatically.', icon:'💡' },
     { title:'Export slides', desc:'Stakeholder-ready decks in a click.', icon:'🎞️' },
@@ -698,9 +667,9 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
 function WhySection(){
   const items = [
     { t:'Your data, private', d:'We never use your files for training. Only you control access.*' },
-    { t:'Enterprise‑grade security', d:'Encryption in transit & at rest, private by default.' },
-    { t:'Always premium output', d:'Every chart, slide and summary looks polished out‑of‑the‑box.' },
-    { t:'Speed and scale', d:'From quick updates to 10k‑row sheets, results in seconds.' },
+    { t:'Enterprise-grade security', d:'Encryption in transit & at rest, private by default.' },
+    { t:'Always premium output', d:'Every chart, slide and summary looks polished out-of-the-box.' },
+    { t:'Speed and scale', d:'From quick updates to 10k-row sheets, results in seconds.' },
   ];
   return (
     <section className="px-6 md:px-24 py-14 bg-white">
@@ -782,7 +751,7 @@ function ImportBox({ onRows, onGate }:{ onRows:(rows:Row[])=>void; onGate:()=>vo
       onRows(rows);
       onGate(); // gate premium features after import
     } else {
-      alert('For the demo, please upload CSV. (XLSX parsing is enabled in the full product).');
+      alert('For the demo, please upload CSV. (Excel supported in the full product).');
     }
   }
   return (
@@ -798,14 +767,11 @@ function ImportBox({ onRows, onGate }:{ onRows:(rows:Row[])=>void; onGate:()=>vo
    Page
    ========================= */
 export default function HomePage(){
-  // Colors
   const [colorA, setColorA] = useState('#6B7280'); // default grey
   const [colorB, setColorB] = useState('#1ABC9C');
 
-  // Data
   const [rows, setRows] = useState(defaultRows());
 
-  // Chart controls
   const [mode, setMode] = useState<Mode>('line');
   const [yA, setYA] = useState<MetricKey>('units');
   const [secondaryOn, setSecondaryOn] = useState<boolean>(false);
@@ -814,12 +780,10 @@ export default function HomePage(){
   const [showGrid, setShowGrid] = useState(true);
   const [pointSize, setPointSize] = useState(6);
 
-  // Gating for imported data
   const [gated, setGated] = useState(false);
 
   const series = useMemo(()=> buildSeries(rows, yA, secondaryOn ? yB : undefined), [rows, yA, yB, secondaryOn]);
 
-  // Export & Slides previews
   const svgRef = useRef<SVGSVGElement|null>(null);
   const [previews, setPreviews] = useState<string[]>([]);
   async function refreshPreviews(){ if(svgRef.current){ const d=await svgToPng(svgRef.current); setPreviews([d,d,d]); } }
@@ -830,9 +794,7 @@ export default function HomePage(){
   return (
     <div className="font-inter">
       <HeroIntro onCTABottom={goTry} rows={rows} color={colorB} />
-
       <HowItWorks onTry={goTry} color={colorB} />
-
       <WhySection />
 
       <section id="try" className="px-6 md:px-24 py-16 bg-gray-50">
@@ -842,9 +804,8 @@ export default function HomePage(){
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 items-start">
-          {/* LEFT: top controls + chart + bottom controls */}
+          {/* LEFT: controls + chart */}
           <div className={`bg-white p-5 rounded-2xl shadow border ${gated? 'pointer-events-none opacity-60':''}`}>
-            {/* TOP controls */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {(['line','area','bar','scatter','dual','pie'] as Mode[]).map(val=> (
                 <button key={val} onClick={()=>setMode(val)} className={`px-4 py-2 rounded-full capitalize border transition-colors ${mode===val? 'bg-emerald-500 text-white border-emerald-500':'bg-white hover:bg-gray-100'}`}>{val}</button>
@@ -852,7 +813,6 @@ export default function HomePage(){
               <ThemedButton color={colorA} onClick={async()=>{ if(gated) return; if(svgRef.current){ const d=await svgToPng(svgRef.current); downloadDataUrl('chartura-chart.png', d); } }} className="ml-auto text-sm">Download PNG</ThemedButton>
             </div>
 
-            {/* CHART */}
             <PremiumChart
               series={series}
               mode={mode}
@@ -867,7 +827,6 @@ export default function HomePage(){
               onRef={el=> (svgRef.current = el)}
             />
 
-            {/* BELOW-CHART controls */}
             <div className="flex flex-wrap items-center gap-3 mt-4">
               <div className="inline-flex items-center gap-2">
                 <span className="text-xs text-gray-500">Primary</span>
@@ -902,7 +861,6 @@ export default function HomePage(){
                 </label>
               )}
 
-              {/* metric pickers */}
               <label className="text-xs text-gray-600">Primary metric (A)
                 <select value={yA} onChange={e=>setYA(e.target.value as MetricKey)} className="mt-1 border rounded p-2">
                   {Object.keys(METRIC_LABEL).map(k=> (<option key={k} value={k}>{METRIC_LABEL[k as MetricKey]}</option>))}
@@ -932,10 +890,7 @@ export default function HomePage(){
         </div>
       </section>
 
-      {/* Insights */}
       <InsightsSection rows={rows} gated={gated} />
-
-      {/* Slides (PowerPoint previews) */}
       <Slides chartRef={svgRef} onRefresh={refreshPreviews} previews={previews} gated={gated} color={colorB} />
     </div>
   );
