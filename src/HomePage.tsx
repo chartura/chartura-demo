@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 
 // =============================================
 // Chartura Homepage — Rev 19 (Askura integrated, no API key toggle)
@@ -56,7 +56,7 @@ async function askOpenAI(
 
 // ---------- Main Component ----------
 export default function HomePage() {
-  const [rows, setRows] = useState<Row[]>(defaultRows());
+  const rows: Row[] = defaultRows();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
 
