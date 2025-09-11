@@ -76,6 +76,8 @@ export default function HomePage() {
 
   return (
     <div className="font-inter">
+<div style={{position:'fixed',bottom:10,right:10,background:'#000',color:'#fff',padding:'4px 8px',borderRadius:8,fontSize:12,zIndex:9999}}>Rev19-marker</div>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 text-white text-center py-20">
         <h1 className="text-4xl font-bold mb-4">Chartura</h1>
