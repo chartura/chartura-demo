@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 
 // =============================================
 // Chartura Homepage — Rev 19 (Askura integrated, no API key toggle)
@@ -44,35 +44,24 @@ async function askOpenAI(
     const res = await fetch('/api/askura', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: prompt, rows, context })
+      body: JSON.stringify({ question: prompt, rows, context }),
     });
-    const text = await res.text();
     if (!res.ok) {
       let msg = 'API error';
-      try { const j = JSON.parse(text); msg = j.error || msg; } catch {}
+      try { const j = await res.json(); msg = (j && j.error) || msg; } catch {}
       return `Askura error: ${msg}`;
     }
-    let data: any = {};
-    try { data = JSON.parse(text); } catch { return 'Askura error: Invalid JSON from server.'; }
-    if (typeof data.answer === 'string' && data.answer.trim().length > 0) return data.answer.trim();
+    const data = await res.json();
+    if (typeof data?.answer === 'string' && data.answer.trim()) return data.answer.trim();
     return 'Askura error: No answer in response.';
   } catch (e: any) {
     return 'Askura error: Network or server unreachable.';
-  }
-},
-      body: JSON.stringify({ question: prompt, rows, context })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    return data.answer || 'No answer.';
-  } catch {
-    return 'Askura server unavailable.';
   }
 }
 
 // ---------- Main Component ----------
 export default function HomePage() {
-  const [rows, setRows] = useState<Row[]>(defaultRows());
+  const [rows] = useState<Row[]>(defaultRows());
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
 
