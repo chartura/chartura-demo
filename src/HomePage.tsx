@@ -1,6 +1,14 @@
 
-import { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+// =============================================
+// Chartura Homepage — Rev 19 (Askura integrated, no API key toggle)
+// =============================================
+
+// (Truncated comment: this file includes Hero, How It Works, Why Chartura, Try It, Askura, Insights)
+// Askura now calls /api/askura and falls back to local logic if backend unavailable.
+
+// ---------- Types & Columns ----------
 interface Row {
   period: string;
   revenue: number;
@@ -13,6 +21,7 @@ interface Row {
 type Mode = 'line' | 'area' | 'bar' | 'scatter' | 'dual' | 'pie';
 type MetricKey = 'revenue' | 'units' | 'costPrice' | 'staffExp';
 
+// ---------- Demo Data ----------
 function defaultRows(): Row[] {
   return [
     { period: '2020', revenue: 300, units: 240, supplier: 'Northstar', costPrice: 0.88, staffExp: 40 },
@@ -24,6 +33,7 @@ function defaultRows(): Row[] {
   ];
 }
 
+// ---------- Askura API Call ----------
 async function askOpenAI(
   _apiKey: string,
   prompt: string,
@@ -44,8 +54,9 @@ async function askOpenAI(
   }
 }
 
+// ---------- Main Component ----------
 export default function HomePage() {
-  const rows: Row[] = defaultRows();
+  const [rows, setRows] = useState<Row[]>(defaultRows());
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
 
@@ -65,25 +76,13 @@ export default function HomePage() {
 
   return (
     <div className="font-inter">
-      <div style={{
-        position: 'fixed',
-        bottom: 10,
-        right: 10,
-        background: '#000',
-        color: '#fff',
-        padding: '4px 8px',
-        borderRadius: 8,
-        fontSize: 12,
-        zIndex: 9999
-      }}>
-        Rev19-marker
-      </div>
-
+      {/* Hero Section */}
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 text-white text-center py-20">
         <h1 className="text-4xl font-bold mb-4">Chartura</h1>
         <p className="text-lg opacity-90 mb-6">Transform your spreadsheets into insights, instantly.</p>
       </section>
 
+      {/* Try It Section */}
       <section className="p-6 max-w-4xl mx-auto">
         <h2 className="text-xl font-semibold mb-4">Askura — Ask Your Data</h2>
         <div className="border rounded-xl p-4 bg-white shadow">
