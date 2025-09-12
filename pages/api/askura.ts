@@ -15,23 +15,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     const apiKey = process.env.OPENAI_API_KEY;
-
-    const totalRevenue = Array.isArray(rows) ? rows.reduce((s, r) => s + (r?.revenue ?? 0), 0) : 0;
-    const first = Array.isArray(rows) && rows.length > 0 ? rows[0] : undefined;
-    const last  = Array.isArray(rows) && rows.length > 0 ? rows[rows.length - 1] : undefined;
-    const trend = first && last ? (last.revenue - first.revenue) : 0;
-
     if (!apiKey) {
-      const answer = `Askura (local): total revenue ≈ ${totalRevenue}. Trend from ${first?.period ?? 'start'} to ${last?.period ?? 'end'} is ${trend >= 0 ? 'up' : 'down'} by ${Math.abs(trend)}. (Add OPENAI_API_KEY to enable AI.)`;
-      return res.status(200).json({ answer });
+      // STRICT: No local fallbacks — fail fast so the UI shows it's misconfigured
+      return res.status(401).json({ error: 'OPENAI_API_KEY is not set on the server.' });
     }
 
     const prompt = [
-      `You are Askura, a concise data analyst.`,
-      `Question: ${question}`,
-      `Context: ${JSON.stringify(context)}`,
-      `Data summary: rows=${Array.isArray(rows) ? rows.length : 0}, totalRevenue=${totalRevenue}, trend=${trend}`,
-      `Answer clearly in 2–5 sentences. If uncertainty exists, say so.`
+      `You are Askura, a concise data analyst that answers questions about a small tabular dataset.`,
+      `User question: ${question}`,
+      `Chart context: ${JSON.stringify(context)}`,
+      `Data (first 12 rows):`,
+      ...(Array.isArray(rows) ? rows.slice(0,12).map(r => `- ${JSON.stringify(r)}`) : ['- none']),
+      `Instructions: Provide a direct answer in 1–2 sentences. Include one brief numeric fact if helpful. Be clear and specific.`
     ].join('\n');
 
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -49,10 +44,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!r.ok) {
       const text = await r.text();
-      return res.status(500).json({ error: `OpenAI error: ${text}` });
+      return res.status(502).json({ error: `OpenAI error: ${text}` });
     }
     const data = await r.json();
-    const answer = data?.choices?.[0]?.message?.content?.trim() ?? 'No answer.';
+    const answer = data?.choices?.[0]?.message?.content?.trim();
+    if (!answer) return res.status(502).json({ error: 'No answer from OpenAI.' });
     res.status(200).json({ answer });
   } catch (e: any) {
     res.status(500).json({ error: e?.message ?? 'Unknown error' });
