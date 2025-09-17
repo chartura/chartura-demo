@@ -961,170 +961,73 @@ function KPIRow({ rows, tone='light' }:{ rows: Row[,
 /* =========================
    Hero + How It Works + Why
    ========================= */
-function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows: Row[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
+
+/* =========================
+   Hero + How It Works + Why
+   ========================= */
+function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows: Row[]; color: string }){
+  // Static example data for hero visuals (not affected by uploads)
+  const staticRows: Row[] = [
+    { period:'2020', revenue:300, units:240, supplier:'Northstar', costPrice:0.88, staffExp:40 },
+    { period:'2021', revenue:350, units:260, supplier:'Northstar', costPrice:0.90, staffExp:44 },
+    { period:'2022', revenue:400, units:290, supplier:'BluePeak',  costPrice:0.91, staffExp:48 },
+    { period:'2023', revenue:460, units:310, supplier:'BluePeak',  costPrice:0.93, staffExp:50 },
+    { period:'2024', revenue:520, units:350, supplier:'Skyline',   costPrice:0.94, staffExp:54 },
+    { period:'2025', revenue:590, units:380, supplier:'Skyline',   costPrice:0.96, staffExp:58 },
   ];
- color:string }){
-  const [i,setI] = useState(0);
-  const wrap = (n:number, len:number)=> (n+len)%len;
-  useEffect(()=>{ const id=setInterval(()=> setI(v=>wrap(v+1,3)), 6000);
-  // --- static example data used only in hero mini chart ---
-  const staticRows = [
-    { period: '2020', revenue: 300, units: 240, supplier: 'Northstar', costPrice: 0.88, staffExp: 40 },
-    { period: '2021', revenue: 350, units: 260, supplier: 'Northstar', costPrice: 0.90, staffExp: 44 },
-    { period: '2022', revenue: 400, units: 290, supplier: 'BluePeak',  costPrice: 0.91, staffExp: 48 },
-    { period: '2023', revenue: 460, units: 310, supplier: 'BluePeak',  costPrice: 0.93, staffExp: 50 },
-    { period: '2024', revenue: 520, units: 350, supplier: 'Skyline',   costPrice: 0.94, staffExp: 54 },
-    { period: '2025', revenue: 590, units: 380, supplier: 'Skyline',   costPrice: 0.96, staffExp: 58 },
-  ];
- return ()=>clearInterval(id); },[]);
 
   const maxU = Math.max(...staticRows.map(x=>x.units));
-  const miniPts = staticRows.map((r,idx)=> [20+idx*(280/(rows.length-1||1)), 150 - (r.units/maxU)*110] as [number,number]);
-  const miniPath = miniPts.length? `M ${miniPts[0][0]} ${miniPts[0][1]} ` + miniPts.slice(1).map(p=>`L ${p[0]} ${p[1]}`).join(' ') : '';
-
-  const items = [
-    
-    { t:'Premium Results', d:'Boardroom-ready visuals with context.', c:(
-      <svg viewBox="0 0 320 180" className="w-full h-48 relative">
-        <defs>
-          <linearGradient id="lineA" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.6" />
-          </linearGradient>
-        </defs>
-        <rect x="0" y="0" width="320" height="180" rx="12" fill="rgba(255,255,255,0.10)"/>
-        <!-- grid -->
-        {[0,1,2,3,4].map(i=> <line key={i} x1={20} y1={30+i*30} x2={300} y2={30+i*30} stroke="rgba(255,255,255,0.15)" />)}
-        <!-- axes -->
-        <line x1="20" y1="150" x2="300" y2="150" stroke="rgba(255,255,255,0.5)" />
-        <line x1="20" y1="30" x2="20" y2="150" stroke="rgba(255,255,255,0.5)" />
-        <text x="160" y="172" textAnchor="middle" fontSize="10" fill="#fff">2020 → 2025</text>
-        <text x="-90" y="10" transform="rotate(-90)" fontSize="10" fill="#fff">Revenue</text>
-        <path d={miniPath} fill="none" stroke="url(#lineA)" strokeWidth="3"/>
-        {miniPts.map((p,idx)=>(<circle key={idx} cx={p[0]} cy={p[1]} r={3} fill="#fff"/>))}
-        {/* shimmer (constrained) */}
-        <rect x="-320" y="0" width="320" height="180" fill="url(#shimmer)">
-          <animate attributeName="x" from="-320" to="320" dur="2.8s" repeatCount="indefinite" />
-        </rect>
-      </svg>
-    ) },
-    
-    { t:'Insights', d:'Key takeaways, risks & actions — tailored.', c:(
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 relative md:-mb-6">
-        <div className="rounded-xl bg-white/10 p-3 md:p-4 border border-white/10 shadow">
-          <div className="text-xs text-white/80 mb-1">Key Takeaways</div>
-          <div className="text-sm text-white/90">• Revenue accelerating since 2022<br/>• Units up 31% since 2021<br/>• Skyline now top supplier</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 md:p-4 border border-white/10 shadow">
-          <div className="text-xs text-white/80 mb-1">Risks & Considerations</div>
-          <div className="text-sm text-white/90">• Rising cost price (0.88→0.96)<br/>• Staff expense trending up<br/>• Supplier concentration risk</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 md:p-4 border border-white/10 shadow">
-          <div className="text-xs text-white/80 mb-1">Recommended Actions</div>
-          <div className="text-sm text-white/90">• Negotiate cost with Skyline<br/>• Invest in ops efficiency<br/>• Diversify suppliers 2026</div>
-        </div>
-      </div>
-    ) },
-    { t:'Askura Q&A', d:'Natural chat with your data.', c:(
-      <div className="text-left bg-white/10 p-2 rounded">
-        <div className="mb-1">You: Who sold most in 2025?</div>
-        <div className="text-white/90">Askura: {answerLocal('top supplier by units in 2025', rows, {mode:'line',yA:'units',secondaryOn:false}, {}).text}</div>
-      </div>
-    ) },
-  ,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
-  const s = items[i,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
+  const miniPts = staticRows.map((r,idx)=> [20+idx*(280/(staticRows.length-1||1)), 150 - (r.units/maxU)*110] as [number,number]);
+  const miniPath = miniPts.length? `M ${miniPts[0][0]} ${miniPts[0][1]}` + miniPts.slice(1).map(p=>` L ${p[0]} ${p[1]}`).join('') : '';
 
   return (
     <section className="bg-gradient-to-tr from-[#0D1F2D] via-[#1F2A44] to-[#1ABC9C] text-white px-6 md:px-24 py-24">
-      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h1 className="text-5xl font-extrabold leading-tight">From spreadsheet to <span className="text-[#1ABC9C]">stakeholder-ready</span> in minutes.</h1>
-          <p className="mt-4 text-gray-100">Import once. Chartura turns your data into premium charts, insights, and slides. Ask questions, get answers — instantly.</p>
-          <div className="mt-6 flex gap-3 items-center">
-            <ThemedButton color="#ffffff" onClick={onCTABottom} textClass="!text-[#0D1F2D]">Try it now</ThemedButton>
-            <ThemedButton color={color}>Start free trial</ThemedButton>
+          <h1 className="text-5xl font-extrabold tracking-tight">Turn chaos into clarity.</h1>
+          <p className="mt-4 text-lg text-white/90">Upload any file — spreadsheets, slides, docs, PDFs. Get instant insights, premium charts and AI answers.</p>
+          <div className="mt-6 flex gap-3">
+            <ThemedButton color={color} onClick={onCTABottom}>Start free 7‑day trial</ThemedButton>
+            <a href="#how" className="rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-white">See how it works</a>
           </div>
         </div>
-        <div className="rounded-2xl bg-white/10 p-6 backdrop-blur shadow text-center select-none">
-          <div className="text-lg font-semibold mb-1">{s.t}</div>
-          <div className="text-sm opacity-90 mb-3">{s.d}</div>
-          <div className="min-h-[184px] flex items-center justify-center">{s.c}</div>
-          <div className="mt-3 flex items-center justify-center gap-3">
-            <button onClick={()=>setI(v=>wrap(v-1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">‹</button>
-            {items.map((_,idx)=> (
-              <button key={idx} onClick={()=>setI(idx)} className={`w-2.5 h-2.5 rounded-full ${idx===i? 'bg-white':'bg-white/40'}`} />
-            ))}
-            <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">›</button>
+        <div>
+          <div className="relative rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur shadow">
+            <div className="text-white/80 text-sm mb-2">Premium Results</div>
+            <svg viewBox="0 0 320 180" className="w-full h-48">
+              <defs>
+                <linearGradient id="lineA" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.6" />
+                </linearGradient>
+                <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                  <stop offset="50%" stopColor="rgba(255,255,255,0.55)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                </linearGradient>
+              </defs>
+              {/* grid */}
+              {[0,1,2,3,4].map(i=> <line key={i} x1={20} y1={30+i*30} x2={300} y2={30+i*30} stroke="rgba(255,255,255,0.15)" />)}
+              {/* axes */}
+              <line x1="20" y1="150" x2="300" y2="150" stroke="rgba(255,255,255,0.5)" />
+              <line x1="20" y1="30" x2="20" y2="150" stroke="rgba(255,255,255,0.5)" />
+              <text x="160" y="172" textAnchor="middle" fontSize="10" fill="#fff">2020 → 2025</text>
+              <text x="-90" y="10" transform="rotate(-90)" fontSize="10" fill="#fff">Revenue</text>
+              {/* line + points */}
+              <path d={miniPath} fill="none" stroke="url(#lineA)" strokeWidth="3"/>
+              {miniPts.map((p,idx)=>(<circle key={idx} cx={p[0]} cy={p[1]} r={3} fill="#fff"/>))}
+              {/* shimmer overlay (clipped to svg) */}
+              <rect x="-320" y="0" width="320" height="180" fill="url(#shimmer)">
+                <animate attributeName="x" from="-320" to="320" dur="2.8s" repeatCount="indefinite" />
+              </rect>
+            </svg>
           </div>
-                {/* hero KPIs */}
-        <div className="md:col-span-2 mt-6">
+        </div>
+        <div className="md:col-span-2 mt-8">
           <KPIRow rows={rows} tone="dark" />
         </div>
       </div>
-    </div></section>
+    </section>
   );
 }
 
