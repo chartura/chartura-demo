@@ -129,7 +129,6 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
 
   const barBand = series.length? plotW / series.length : 0; const barW = Math.max(16, Math.min(42, barBand*0.6));
 
-  const totalA = series.reduce((s,p)=> s+p.a, 0);
   const legendItems = series.map((p,i)=> ({ label: p.label, color: i%2? colorB: colorA }));
 
   return (
@@ -205,7 +204,7 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
         )}
         {mode==='bar' && (
           <g>
-            {series.map((p,i)=>{ const cx = xsBar(i); const barW = 28; const x = cx - barW/2; const y = ysA(p.a); const h = (height-padB) - y; return (
+            {series.map((p,i)=>{ const cx = xsBar(i); const x = cx - barW/2; const y = ysA(p.a); const h = (height-padB) - y; return (
               <g key={i}>
                 <rect x={x} y={y} width={barW} height={h} rx={8} fill={colorA}/>
                 {p.b!=null && (()=>{ const y2 = ysB(p.b||0); const h2 = (height-padB)-y2; return (<rect x={x} y={y2} width={barW} height={h2} rx={8} fill={colorB} opacity={0.55}/>); })()}
@@ -222,8 +221,9 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
         )}
         {mode==='pie' && (
           <g>
-            {(()=>{ const cx = width/2, cy = height/2+10, R = Math.min((width-180), (height-114))/2.0; let start=-90; return series.map((p,i)=>{
-              const totalA = series.reduce((s,q)=> s+q.a, 0) || 1;
+            {(()=>{ const cx = width/2, cy = height/2+10, R = Math.min((width-180), (height-114))/2.0; const totalA = series.reduce((s,p)=>s + (p.a ?? 0), 0);
+let start=-90; return series.map((p,i)=>{
+
               const ang = (p.a/totalA)*360;
               const end=start+ang; const large = ang>180?1:0;
               const x1=cx+R*Math.cos((start*Math.PI)/180), y1=cy+R*Math.sin((start*Math.PI)/180);
@@ -792,7 +792,7 @@ export default function HomePage(){
   function goTry(){ const el=document.getElementById('try'); if(el) el.scrollIntoView({behavior:'smooth'}); }
 
   return (
-    <div className="font-inter">
+    <div className="font-inter min-h-screen">
       <HeroIntro onCTABottom={goTry} rows={rows} color={colorB} />
       <HowItWorks onTry={goTry} color={colorB} />
       <WhySection />
