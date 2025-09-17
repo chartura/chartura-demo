@@ -38,29 +38,7 @@ function defaultRows(): Row[] {
     { period:'2023', revenue: 460, units: 310, supplier:'BluePeak',  costPrice: 0.93, staffExp: 50 },
     { period:'2024', revenue: 520, units: 350, supplier:'Skyline',   costPrice: 0.94, staffExp: 54 },
     { period:'2025', revenue: 590, units: 380, supplier:'Skyline',   costPrice: 0.96, staffExp: 58 },
-  ,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
   ];
-
 }
 
 /* =========================
@@ -122,29 +100,7 @@ function ThemedButton({ color, children, onClick, className='', textClass='' }:
    PremiumChart (SVG)
    ========================= */
 function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabelRight, showGrid=true, pointSize=6, useRightAxis=false, onRef }:{
-  series: Pt[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- mode: Mode; colorA: string; colorB: string; xLabel:string; yLabelLeft:string; yLabelRight?:string; showGrid?:boolean; pointSize?:number; useRightAxis?:boolean; onRef?: (el:SVGSVGElement|null)=>void;
+  series: Pt[]; mode: Mode; colorA: string; colorB: string; xLabel:string; yLabelLeft:string; yLabelRight?:string; showGrid?:boolean; pointSize?:number; useRightAxis?:boolean; onRef?: (el:SVGSVGElement|null)=>void;
 }){
   const width=860, height=440, padL=90, padR=90, padT=28, padB=86;
   const plotW = width - padL - padR, plotH = height - padT - padB;
@@ -162,53 +118,9 @@ function PremiumChart({ series, mode, colorA, colorB, xLabel, yLabelLeft, yLabel
   function pathFor(vals:number[], y:(v:number)=>number){
     if(vals.length<2) return '';
     const pts = vals.map((v,i)=> [xs(i), y(v)] as [number, number]);
-    const d:string[] = [`M ${pts[0][0]} ${pts[0][1]}`,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+    const d:string[] = [`M ${pts[0][0]} ${pts[0][1]}`];
     for(let i=0;i<pts.length-1;i++){
-      const p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2),
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+      const p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2)];
       const t=0.3; const c1x=p1[0]+(p2[0]-p0[0])*t/2, c1y=p1[1]+(p2[1]-p0[1])*t/2; const c2x=p2[0]-(p3[0]-p1[0])*t/2, c2y=p2[1]-(p3[1]-p1[1])*t/2;
       d.push(`C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2[0]} ${p2[1]}`);
     }
@@ -355,29 +267,7 @@ let start=-90; return series.map((p,i)=>{
 /* =========================
    Data Grid
    ========================= */
-function DataGrid({ rows, setRows, color }:{ rows: Row[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- setRows:(r:Row[])=>void; color:string }){
+function DataGrid({ rows, setRows, color }:{ rows: Row[]; setRows:(r:Row[])=>void; color:string }){
   function update(i:number, key: keyof Row, val:string){
     const next=rows.slice();
     if(key==='period'||key==='supplier') (next[i] as any)[key]=val; else (next[i] as any)[key]=num(val);
@@ -427,29 +317,7 @@ function DataGrid({ rows, setRows, color }:{ rows: Row[,
 /* =========================
    Askura (BACKEND FIRST, local fallback)
    ========================= */
-interface AskuraMemory { kind?: 'topSupplier'|'marginMax'|'growth'|'total'|'min'|'max'; metric?: MetricKey|'margin'; year?: string; years?: string[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- supplier?: string; value?: number }
+interface AskuraMemory { kind?: 'topSupplier'|'marginMax'|'growth'|'total'|'min'|'max'; metric?: MetricKey|'margin'; year?: string; years?: string[]; supplier?: string; value?: number }
 
 async function askOpenAI(
   _apiKey: string, // not used anymore
@@ -497,29 +365,7 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
   }
 
   if(/what\s+does\s+this\s+chart|which\s+metrics\s+are\s+shown/.test(text)){
-    const primary = METRIC_LABEL[context.yA,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+    const primary = METRIC_LABEL[context.yA];
     const secondary = context.secondaryOn && context.yB ? ` and ${METRIC_LABEL[context.yB]}` : '';
     return { text:`The chart is a ${context.mode} showing ${primary}${secondary} by Year.`, mem };
   }
@@ -581,29 +427,7 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
   // growth/delta between two years
   const yMatches = text.match(/(20\d{2}).*(20\d{2})/);
   if(/growth|change|delta|increase|decrease/.test(text) && yMatches){
-    const y1=yMatches[1], y2=yMatches[2,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+    const y1=yMatches[1], y2=yMatches[2];
     const r1 = rows.filter(r=> r.period===y1); const r2=rows.filter(r=> r.period===y2);
     const metric: MetricKey| 'margin' = /margin/.test(text)? 'margin' : /unit/.test(text)? 'units' : /revenue|sales(?!\s*units)/.test(text)? 'revenue' : /staff/.test(text)? 'staffExp' : /cost/.test(text)? 'costPrice' : 'revenue';
     const val = (rs:Row[])=> metric==='margin' ? rs.reduce((s,r)=> s + (r.revenue - r.costPrice*r.units - r.staffExp),0) : rs.reduce((s,r)=> s + (r[metric] as number), 0);
@@ -628,29 +452,7 @@ function answerLocal(q: string, rows: Row[], context:{mode:Mode;yA:MetricKey;yB?
   return { text:'Try: "Top supplier by revenue", "Revenue growth 2024 to 2025", or "What does this chart show?"', mem };
 }
 
-function Askura({ rows, context, color }:{ rows: Row[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- context:{mode:Mode;yA:MetricKey;yB?:MetricKey;secondaryOn:boolean}; color:string }){
+function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:MetricKey;yB?:MetricKey;secondaryOn:boolean}; color:string }){
   const [memory, setMemory] = useState<AskuraMemory>({});
   const seed = answerLocal('Which supplier drove most units in 2025?', rows, context, {});
   const [messages, setMessages] = useState<{role:'user'|'ai'; text:string}[]>([
@@ -710,158 +512,26 @@ function computeInsights(rows: Row[]) {
   const bySup = new Map<string, {rev:number; units:number}>();
   rows.forEach(r=>{ const v=bySup.get(r.supplier)||{rev:0,units:0}; v.rev+=r.revenue; v.units+=r.units; bySup.set(r.supplier,v); });
   const rank = Array.from(bySup.entries()).sort((a,b)=> b[1].rev - a[1].rev);
-  const top = rank[0,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- const bottom = rank[rank.length-1,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+  const top = rank[0]; const bottom = rank[rank.length-1];
 
   const bullets = [
     `Revenue ${revChg>=0?'up':'down'} ${Math.abs(Math.round(revChg))}% vs ${prev.period}.`,
     `Units ${unitsChg>=0?'up':'down'} ${Math.abs(Math.round(unitsChg))}% vs ${prev.period}.`,
     `Latest approx. margin ${Math.round((marginL/latest.revenue)*100)}%.`,
     top? `Top supplier overall: ${top[0]} (${Math.round(top[1].rev)} revenue).` : '—',
-  ,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
   ];
-
   const actions = [
     top && bottom ? `Rebalance supplier mix: ${bottom[0]} trails ${top[0]}. Consider shifting demand or renegotiating.` : undefined,
     `Review price where cost price trends up.`,
     `Hold staff expenses ≤ 15% of revenue.`,
-  ].filter(Boolean) as string[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+  ].filter(Boolean) as string[];
   const risks = [
     top ? `Concentration risk with ${top[0]} — add a backup supplier.` : undefined,
-  ].filter(Boolean) as string[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+  ].filter(Boolean) as string[];
   return { bullets, actions, risks };
 }
 
-function InsightsSection({ rows, gated }:{ rows: Row[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- gated:boolean }){
+function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
   const { bullets, actions, risks } = computeInsights(rows);
   const Card = ({ title, icon, children }:{ title:string; icon: React.ReactNode; children: React.ReactNode }) => (
     <div className="rounded-2xl bg-white p-6 shadow border transition-transform duration-200 hover:-translate-y-0.5">
@@ -873,8 +543,6 @@ function InsightsSection({ rows, gated }:{ rows: Row[,
     <section className="py-14 px-6 md:px-24 bg-white">
       <div className={`max-w-6xl mx-auto ${gated?'blur-sm pointer-events-none':''}`}>
         <h3 className="text-xl font-semibold mb-4">Insights</h3>
-        <div className="mb-6"><KPIRow rows={rows} tone="light" /></div>
-        <div className="mb-6"><KPIRow rows={rows} tone="light" /></div>
         <div className="grid lg:grid-cols-3 gap-6">
           <Card title="Key takeaways" icon={<span>💡</span>}>
             <ul className="list-disc list-inside space-y-1">{bullets.map((b,i)=> <li key={i}>{b}</li>)}</ul>
@@ -892,139 +560,57 @@ function InsightsSection({ rows, gated }:{ rows: Row[,
   );
 }
 
-
-/* =========================
-   Lightweight KPIs
-   ========================= */
-function computeKPIs(rows: Row[]) {
-  if (!rows || rows.length === 0) return { total: 0, yoy: 0, marginPct: 0, best: '-' };
-  const ordered = rows.slice().sort((a,b)=> (+a.period)-(+b.period));
-  const latest = ordered[ordered.length-1], prev = ordered[ordered.length-2] || latest;
-  const total = rows.reduce((s,r)=> s + r.revenue, 0);
-  const yoy = pct(latest.revenue, prev.revenue);
-  const margin = latest.revenue - (latest.costPrice * latest.units) - latest.staffExp;
-  const marginPct = latest.revenue ? (margin / latest.revenue) * 100 : 0;
-  const best = ordered.reduce((m,r)=> r.revenue > (m?.revenue ?? -Infinity) ? r : m, ordered[0]).period;
-  return { total, yoy, marginPct, best };
-}
-
-function KPIRow({ rows, tone='light' }:{ rows: Row[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- tone?: 'light'|'dark' }){
-  const { total, yoy, marginPct, best } = computeKPIs(rows);
-  const up = yoy >= 0;
-  const base = tone==='dark'
-    ? 'bg-white/10 border-white/10 text-white'
-    : 'bg-white border-slate-200 text-slate-900';
-  const sub = tone==='dark' ? 'text-white/70' : 'text-slate-500';
-  const tile = (label:string, value:string, hint?:string)=>(
-    <div className={`rounded-2xl px-5 py-4 shadow border ${base}`}>
-      <div className={`text-xs ${sub}`}>{label}</div>
-      <div className="text-xl font-semibold tracking-tight justify-center">{value}</div>
-      {hint && <div className={`text-xs mt-0.5 ${sub}`}>{hint}</div>}
-    </div>
-  );
-  return (
-    <div>
-      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mb-3`} />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        {tile('Total revenue', '£' + total.toLocaleString())}
-        {tile('YoY revenue', (up?'+':'−') + Math.abs(Math.round(yoy)) + '%', `${up?'▲':'▼'} vs previous year`)}
-        {tile('Latest margin', Math.round(marginPct) + '%')}
-        {tile('Best year', String(best))}
-      </div>
-      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mt-3`} />
-    </div>
-  );
-}
-
 /* =========================
    Hero + How It Works + Why
    ========================= */
+function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows: Row[]; color:string }){
+  const [i,setI] = useState(0);
+  const wrap = (n:number, len:number)=> (n+len)%len;
+  useEffect(()=>{ const id=setInterval(()=> setI(v=>wrap(v+1,3)), 6000); return ()=>clearInterval(id); },[]);
 
-/* =========================
-   Hero + How It Works + Why
-   ========================= */
-function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows: Row[]; color: string }){
-  // Static example data for hero visuals (not affected by uploads)
-  const staticRows: Row[] = [
-    { period:'2020', revenue:300, units:240, supplier:'Northstar', costPrice:0.88, staffExp:40 },
-    { period:'2021', revenue:350, units:260, supplier:'Northstar', costPrice:0.90, staffExp:44 },
-    { period:'2022', revenue:400, units:290, supplier:'BluePeak',  costPrice:0.91, staffExp:48 },
-    { period:'2023', revenue:460, units:310, supplier:'BluePeak',  costPrice:0.93, staffExp:50 },
-    { period:'2024', revenue:520, units:350, supplier:'Skyline',   costPrice:0.94, staffExp:54 },
-    { period:'2025', revenue:590, units:380, supplier:'Skyline',   costPrice:0.96, staffExp:58 },
+  const maxU = Math.max(...rows.map(x=>x.units));
+  const miniPts = rows.map((r,idx)=> [20+idx*(280/(rows.length-1||1)), 150 - (r.units/maxU)*110] as [number,number]);
+  const miniPath = miniPts.length? `M ${miniPts[0][0]} ${miniPts[0][1]} ` + miniPts.slice(1).map(p=>`L ${p[0]} ${p[1]}`).join(' ') : '';
+
+  const items = [
+    { t:'Premium charts', d:'Beautiful visuals instantly.', c:(
+      <svg viewBox="0 0 320 160" className="w-full h-44">
+        <rect x="0" y="0" width="320" height="160" rx="12" fill="rgba(255,255,255,0.10)"/>
+        <path d={miniPath} fill="none" stroke="#fff" strokeWidth="3"/>
+        {miniPts.map((p,idx)=>(<circle key={idx} cx={p[0]} cy={p[1]} r={3} fill="#fff"/>))}
+      </svg>
+    ) },
+    { t:'Insights', d:'Snapshot of drivers, actions, risks.', c:(<InsightsMiniReal rows={rows}/> ) },
+    { t:'Askura Q&A', d:'Natural chat with your data.', c:(
+      <div className="text-left bg-white/10 p-2 rounded">
+        <div className="mb-1">You: Who sold most in 2025?</div>
+        <div className="text-white/90">Askura: {answerLocal('top supplier by units in 2025', rows, {mode:'line',yA:'units',secondaryOn:false}, {}).text}</div>
+      </div>
+    ) },
   ];
-
-  const maxU = Math.max(...staticRows.map(x=>x.units));
-  const miniPts = staticRows.map((r,idx)=> [20+idx*(280/(staticRows.length-1||1)), 150 - (r.units/maxU)*110] as [number,number]);
-  const miniPath = miniPts.length? `M ${miniPts[0][0]} ${miniPts[0][1]}` + miniPts.slice(1).map(p=>` L ${p[0]} ${p[1]}`).join('') : '';
-
+  const s = items[i];
   return (
     <section className="bg-gradient-to-tr from-[#0D1F2D] via-[#1F2A44] to-[#1ABC9C] text-white px-6 md:px-24 py-24">
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h1 className="text-5xl font-extrabold tracking-tight">Turn chaos into clarity.</h1>
-          <p className="mt-4 text-lg text-white/90">Upload any file — spreadsheets, slides, docs, PDFs. Get instant insights, premium charts and AI answers.</p>
-          <div className="mt-6 flex gap-3">
-            <ThemedButton color={color} onClick={onCTABottom}>Start free 7‑day trial</ThemedButton>
-            <a href="#how" className="rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-white">See how it works</a>
+          <h1 className="text-5xl font-extrabold leading-tight">From spreadsheet to <span className="text-[#1ABC9C]">stakeholder-ready</span> in minutes.</h1>
+          <p className="mt-4 text-gray-100">Import once. Chartura turns your data into premium charts, insights, and slides. Ask questions, get answers — instantly.</p>
+          <div className="mt-6 flex gap-3 items-center">
+            <ThemedButton color="#ffffff" onClick={onCTABottom} textClass="!text-[#0D1F2D]">Try it now</ThemedButton>
+            <ThemedButton color={color}>Start free trial</ThemedButton>
           </div>
         </div>
-        <div>
-          <div className="relative rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur shadow">
-            <div className="text-white/80 text-sm mb-2">Premium Results</div>
-            <svg viewBox="0 0 320 180" className="w-full h-48">
-              <defs>
-                <linearGradient id="lineA" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.6" />
-                </linearGradient>
-                <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-                  <stop offset="50%" stopColor="rgba(255,255,255,0.55)" />
-                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                </linearGradient>
-              </defs>
-              {/* grid */}
-              {[0,1,2,3,4].map(i=> <line key={i} x1={20} y1={30+i*30} x2={300} y2={30+i*30} stroke="rgba(255,255,255,0.15)" />)}
-              {/* axes */}
-              <line x1="20" y1="150" x2="300" y2="150" stroke="rgba(255,255,255,0.5)" />
-              <line x1="20" y1="30" x2="20" y2="150" stroke="rgba(255,255,255,0.5)" />
-              <text x="160" y="172" textAnchor="middle" fontSize="10" fill="#fff">2020 → 2025</text>
-              <text x="-90" y="10" transform="rotate(-90)" fontSize="10" fill="#fff">Revenue</text>
-              {/* line + points */}
-              <path d={miniPath} fill="none" stroke="url(#lineA)" strokeWidth="3"/>
-              {miniPts.map((p,idx)=>(<circle key={idx} cx={p[0]} cy={p[1]} r={3} fill="#fff"/>))}
-              {/* shimmer overlay (clipped to svg) */}
-              <rect x="-320" y="0" width="320" height="180" fill="url(#shimmer)">
-                <animate attributeName="x" from="-320" to="320" dur="2.8s" repeatCount="indefinite" />
-              </rect>
-            </svg>
+        <div className="rounded-2xl bg-white/10 p-6 backdrop-blur shadow text-center select-none">
+          <div className="text-lg font-semibold mb-1">{s.t}</div>
+          <div className="text-sm opacity-90 mb-3">{s.d}</div>
+          <div className="min-h-[184px] flex items-center justify-center">{s.c}</div>
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <button onClick={()=>setI(v=>wrap(v-1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">‹</button>
+            {items.map((_,idx)=> (
+              <button key={idx} onClick={()=>setI(idx)} className={`w-2.5 h-2.5 rounded-full ${idx===i? 'bg-white':'bg-white/40'}`} />
+            ))}
+            <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">›</button>
           </div>
-        </div>
-        <div className="md:col-span-2 mt-8">
-          <KPIRow rows={rows} tone="dark" />
         </div>
       </div>
     </section>
@@ -1058,29 +644,7 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
     { title:'Ask anything', desc:'Askura answers natural language about your data.', icon:'🤖' },
     { title:'Actionable insights', desc:'Drivers, risks and actions — automatically.', icon:'💡' },
     { title:'Export slides', desc:'Stakeholder-ready decks in a click.', icon:'🎞️' },
-  ,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
   ];
-
   return (
     <section className="bg-white text-[#0D1F2D] py-16 px-6 md:px-24 text-center">
       <div className="max-w-7xl mx-auto">
@@ -1094,8 +658,9 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
             </div>
           ))}
         </div>
-        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton>              </div>
-    </div></section>
+        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton></div>
+      </div>
+    </section>
   );
 }
 
@@ -1105,29 +670,7 @@ function WhySection(){
     { t:'Enterprise-grade security', d:'Encryption in transit & at rest, private by default.' },
     { t:'Always premium output', d:'Every chart, slide and summary looks polished out-of-the-box.' },
     { t:'Speed and scale', d:'From quick updates to 10k-row sheets, results in seconds.' },
-  ,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
   ];
-
   return (
     <section className="px-6 md:px-24 py-14 bg-white">
       <div className="max-w-6xl mx-auto text-center">
@@ -1141,37 +684,16 @@ function WhySection(){
             </div>
           ))}
         </div>
-        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.              </div>
-    </div></section>
+        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.</div>
+      </div>
+    </section>
   );
 }
 
 /* =========================
    Slides (previews)
    ========================= */
-function Slides({ chartRef, onRefresh, previews, gated, color }:{ chartRef: React.MutableRefObject<SVGSVGElement|null>; onRefresh: ()=>void; previews: string[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- gated:boolean; color:string }){
+function Slides({ chartRef, onRefresh, previews, gated, color }:{ chartRef: React.MutableRefObject<SVGSVGElement|null>; onRefresh: ()=>void; previews: string[]; gated:boolean; color:string }){
   async function download(){ if(gated) return; if(previews.length){ previews.forEach((src,i)=> downloadDataUrl(`Chartura_Slide_${i+1}.png`, src)); } else if(chartRef.current){ const d=await svgToPng(chartRef.current); downloadDataUrl('Chartura_Slide_1.png', d); } }
   return (
     <section className="py-14 px-6 md:px-24 bg-gray-50">
@@ -1204,53 +726,9 @@ function Slides({ chartRef, onRefresh, previews, gated, color }:{ chartRef: Reac
 function ImportBox({ onRows, onGate }:{ onRows:(rows:Row[])=>void; onGate:()=>void }){
   function parseCSV(text:string): Row[]{
     const lines = text.trim().split(/\r?\n/);
-    const headers = lines.shift()?.split(',').map(s=>s.trim().toLowerCase())||[,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+    const headers = lines.shift()?.split(',').map(s=>s.trim().toLowerCase())||[];
     const idx = (h:string)=> headers.indexOf(h);
-    const out: Row[] = [,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
-
+    const out: Row[] = [];
     for(const line of lines){
       const cols = line.split(',');
       const row: Row = {
@@ -1280,29 +758,7 @@ function ImportBox({ onRows, onGate }:{ onRows:(rows:Row[])=>void; onGate:()=>vo
     <div className="rounded-2xl border-2 border-dashed p-5 text-center">
       <div className="font-semibold mb-1">Import your data</div>
       <div className="text-sm text-gray-600 mb-3">Upload a CSV to populate the table and charts. (Excel supported in the full product)</div>
-      <input type="file" accept=".csv,.xlsx" onChange={e=>{ const f=e.target.files?.[0,
-    { t:'KPIs at a Glance', d:'What leaders check first.', c:(
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center place-items-center">
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Total Revenue</div>
-          <div className="text-lg font-semibold">£2.62m</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">YoY Growth</div>
-          <div className="text-lg font-semibold">+13%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Margin</div>
-          <div className="text-lg font-semibold">42%</div>
-        </div>
-        <div className="rounded-xl bg-white/10 p-3 border border-white/10 shadow-sm">
-          <div className="text-xs text-white/70">Best Year</div>
-          <div className="text-lg font-semibold">2025</div>
-        </div>
-      </div>
-    ) }
-  ];
- if(f) handleFile(f); }} className="mx-auto"/>
+      <input type="file" accept=".csv,.xlsx" onChange={e=>{ const f=e.target.files?.[0]; if(f) handleFile(f); }} className="mx-auto"/>
     </div>
   );
 }
