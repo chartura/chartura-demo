@@ -145,7 +145,6 @@ export default function HomePage() {
             if (Array.isArray(parsed)) setRows(parsed as Row[]);
             else setImportErr('JSON must be an array of objects with the expected columns.');
           } else if (ext === 'txt') {
-            // naive parse: numbers per line, period inferred as index
             const lines = text.split(/\r?\n/).filter(Boolean);
             const imported: Row[] = lines.map((line, i) => {
               const nums = line.split(/[,\s]+/).map(n => Number(n));
@@ -160,12 +159,10 @@ export default function HomePage() {
       fr.readAsText(file);
     } else if (ext && willDoServer.includes(ext)) {
       setImportErr('This file type will be parsed on the server in your dashboard (trial required).');
-      // TODO: send to /api/upload for server-side parsing once dashboard is live.
     } else {
       setImportErr('Unsupported file type. Try CSV/TSV/JSON or Excel export.');
     }
 
-    // Reset input value so re-uploading the same file triggers change
     e.target.value = '';
   }
 
@@ -319,11 +316,11 @@ export default function HomePage() {
               <tfoot className="bg-slate-50">
                 <tr className="font-medium">
                   <td className="px-4 py-2">Totals</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.units, 0).toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.units.toLocaleString()}</td>
                   <td className="px-4 py-2">—</td>
                   <td className="px-4 py-2">—</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.staffExp, 0).toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.staffExp.toLocaleString()}</td>
                 </tr>
               </tfoot>
             </table>
