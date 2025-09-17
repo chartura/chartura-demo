@@ -482,14 +482,14 @@ function Askura({ rows, context, color }:{ rows: Row[]; context:{mode:Mode;yA:Me
   }
 
   return (
-    <div className="rounded-2xl bg-gray-50 border p-4">
+    <div className="rounded-2xl bg-white/60 backdrop-blur border border-slate-200/70 shadow-sm p-4">
       <div className="mb-2">
         <div className="text-sm font-semibold">Askura — Ask your data</div>
         <div className="text-xs text-gray-600">Natural language questions about the table. Follow-ups like “when was this?” work too.</div>
       </div>
       <div className="h-56 overflow-y-auto space-y-2 mb-2" ref={chatRef}>
         {messages.map((m,i)=> (
-          <div key={i} className={`px-3 py-2 rounded-lg max-w-[75%] ${m.role==='user'? 'bg-[#1ABC9C] text-white ml-auto':'bg-white border text-gray-800'}`}>{m.text}</div>
+          <div key={i} className={`px-3 py-2 rounded-xl max-w-[75%] shadow-sm ${m.role==='user'? 'bg-[#1ABC9C] text-white ml-auto':'bg-white/90 border border-slate-200 text-gray-800'}`}>{m.text}</div>
         ))}
       </div>
       <div className="flex gap-2">
@@ -543,6 +543,7 @@ function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
     <section className="py-14 px-6 md:px-24 bg-white">
       <div className={`max-w-6xl mx-auto ${gated?'blur-sm pointer-events-none':''}`}>
         <h3 className="text-xl font-semibold mb-4">Insights</h3>
+        <div className="mb-6"><KPIRow rows={rows} tone="light"/></div>
         <div className="grid lg:grid-cols-3 gap-6">
           <Card title="Key takeaways" icon={<span>💡</span>}>
             <ul className="list-disc list-inside space-y-1">{bullets.map((b,i)=> <li key={i}>{b}</li>)}</ul>
@@ -611,6 +612,9 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
             ))}
             <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">›</button>
           </div>
+                {/* HERO KPIs inserted */}
+        <div className="mt-8">
+          <KPIRow rows={rows} tone="dark"/>
         </div>
       </div>
     </section>
@@ -658,7 +662,10 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
             </div>
           ))}
         </div>
-        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton></div>
+        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton>        {/* HERO KPIs inserted */}
+        <div className="mt-8">
+          <KPIRow rows={rows} tone="dark"/>
+        </div>
       </div>
     </section>
   );
@@ -684,7 +691,10 @@ function WhySection(){
             </div>
           ))}
         </div>
-        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.</div>
+        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.        {/* HERO KPIs inserted */}
+        <div className="mt-8">
+          <KPIRow rows={rows} tone="dark"/>
+        </div>
       </div>
     </section>
   );
@@ -693,6 +703,43 @@ function WhySection(){
 /* =========================
    Slides (previews)
    ========================= */
+
+/* =========================
+   KPIs (reusable)
+   ========================= */
+function computeKPIs(rows: Row[]) {
+  const totalRevenue = rows.reduce((s,r)=> s + r.revenue, 0);
+  const ordered = rows.slice().sort((a,b)=> (+a.period)-(+b.period));
+  const latest = ordered[ordered.length-1], prev = ordered[ordered.length-2] || ordered[ordered.length-1];
+  const yoyRevenue = prev ? pct(latest.revenue, prev.revenue) : 0;
+  const costL = latest.costPrice * latest.units; const staffL = latest.staffExp; const marginL = latest.revenue - costL - staffL;
+  const marginPctLatest = latest.revenue ? (marginL / latest.revenue)*100 : 0;
+  const bestYear = ordered.reduce((best, r)=> r.revenue > (best?.revenue ?? -Infinity) ? r : best, ordered[0]);
+  return { totalRevenue, yoyRevenue, marginPctLatest, bestYear: bestYear?.period || latest.period };
+}
+
+function KPIRow({ rows, tone='dark' }:{ rows: Row[]; tone?: 'dark'|'light' }){
+  const { totalRevenue, yoyRevenue, marginPctLatest, bestYear } = computeKPIs(rows);
+  const clsBase = "rounded-2xl px-5 py-4 shadow border";
+  const tile = (label:string, value:string, hint?:string)=> (
+    <div className={`${clsBase} ${tone==='dark' ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+      <div className={`text-xs ${tone==='dark' ? 'text-white/80' : 'text-slate-500'}`}>{label}</div>
+      <div className="text-xl font-semibold tracking-tight">{value}</div>
+      {hint && <div className={`text-xs mt-0.5 ${tone==='dark' ? 'text-white/70' : 'text-slate-500'}`}>{hint}</div>}
+    </div>
+  );
+  const up = yoyRevenue>=0;
+  const yoyStr = `${up? '▲':'▼'} ${Math.abs(Math.round(yoyRevenue))}% vs last year`;
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {tile("Total revenue", "£"+ totalRevenue.toLocaleString())}
+      {tile("YoY revenue", (up?'+' :'−') + Math.abs(Math.round(yoyRevenue)) + "%", yoyStr)}
+      {tile("Latest margin", Math.round(marginPctLatest) + "%")}
+      {tile("Best year", String(bestYear))}
+    </div>
+  );
+}
+
 function Slides({ chartRef, onRefresh, previews, gated, color }:{ chartRef: React.MutableRefObject<SVGSVGElement|null>; onRefresh: ()=>void; previews: string[]; gated:boolean; color:string }){
   async function download(){ if(gated) return; if(previews.length){ previews.forEach((src,i)=> downloadDataUrl(`Chartura_Slide_${i+1}.png`, src)); } else if(chartRef.current){ const d=await svgToPng(chartRef.current); downloadDataUrl('Chartura_Slide_1.png', d); } }
   return (
