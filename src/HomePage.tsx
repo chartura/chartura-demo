@@ -311,11 +311,11 @@ export default function HomePage() {
               <tfoot className="bg-slate-50">
                 <tr className="font-medium">
                   <td className="px-4 py-2">Totals</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.units, 0).toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.units.toLocaleString()}</td>
                   <td className="px-4 py-2">—</td>
                   <td className="px-4 py-2">—</td>
-                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.staffExp, 0).toLocaleString()}</td>
+                  <td className="px-4 py-2">{totals.staffExp.toLocaleString()}</td>
                 </tr>
               </tfoot>
             </table>
