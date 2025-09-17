@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState} from 'react';
 import PremiumShowcase from './sections/PremiumShowcase';
 import TrialModal from './components/TrialModal';
 
@@ -278,7 +278,7 @@ export default function HomePage() {
               <div className="relative h-56 rounded-2xl bg-white/15 overflow-hidden">
                 {/* pseudo chart bars/line */}
                 <div className="absolute inset-0 flex items-end gap-2 px-4 pb-4">
-                  {[18,24,28,36,44,52].map((h,i)=>(
+                  {[18,24,28,36,44,52].map((_,i)=>(
                     <div key={i} className="flex-1 bg-gradient-to-t from-amber-400/60 to-rose-400/60 rounded"></div>
                   ))}
                 </div>
