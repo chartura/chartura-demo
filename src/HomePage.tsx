@@ -617,7 +617,8 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
           <KPIRow rows={rows} tone="dark"/>
         </div>
       </div>
-    </section>
+      </div>
+</section>
   );
 }
 
@@ -662,10 +663,7 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
             </div>
           ))}
         </div>
-        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton>        {/* HERO KPIs inserted */}
-        <div className="mt-8">
-          <KPIRow rows={rows} tone="dark"/>
-        </div>
+        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton></div>
       </div>
     </section>
   );
@@ -691,7 +689,7 @@ function WhySection(){
             </div>
           ))}
         </div>
-        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.        {/* HERO KPIs inserted */}
+        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.</div>        {/* HERO KPIs inserted */}
         <div className="mt-8">
           <KPIRow rows={rows} tone="dark"/>
         </div>
