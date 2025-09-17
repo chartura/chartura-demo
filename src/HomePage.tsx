@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import PremiumShowcase from './sections/PremiumShowcase';
+import TrialModal from './components/TrialModal';
 
 interface Row {
   period: string;
@@ -83,10 +84,27 @@ export default function HomePage() {
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([
     { role: 'ai', text: 'Know exactly what’s working — ask me anything about your data.' }
   ]);
+  const [showTrial, setShowTrial] = useState(false);
+  const [trialActive, setTrialActive] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('trialActive') === 'true';
+  });
 
-  // File input ref
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [importErr, setImportErr] = useState<string>('');
+
+  function gateOr(fn: () => void) {
+    if (trialActive) return fn();
+    setShowTrial(true);
+  }
+
+  function startTrial() {
+    setTrialActive(true);
+    if (typeof window !== 'undefined') localStorage.setItem('trialActive', 'true');
+    setShowTrial(false);
+    // auto open file picker after enabling trial
+    setTimeout(() => fileRef.current?.click(), 50);
+  }
 
   async function send() {
     const q = input.trim();
@@ -98,7 +116,7 @@ export default function HomePage() {
   }
 
   function onPickFile() {
-    fileRef.current?.click();
+    gateOr(() => fileRef.current?.click());
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -106,29 +124,52 @@ export default function HomePage() {
     if (!file) return;
     setImportErr('');
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'csv') {
-      setImportErr('Please upload a CSV file (Excel export is fine).');
-    }
-    const fr = new FileReader();
-    fr.onload = () => {
-      try {
-        const text = String(fr.result || '');
-        const imported = parseCsvToRows(text);
-        if (imported.length === 0) {
-          setImportErr('No rows found. Make sure your CSV has a header with: period,revenue,units,supplier,costPrice,staffExp');
-        } else {
-          setRows(imported);
+    const supportedClient = ['csv', 'tsv', 'json', 'txt'];
+    const willDoServer = ['xlsx','xls','pdf','docx','pptx','pages','numbers','key'];
+
+    if (ext && supportedClient.includes(ext)) {
+      const fr = new FileReader();
+      fr.onload = () => {
+        try {
+          const text = String(fr.result || '');
+          if (ext === 'csv' || ext === 'tsv') {
+            const normalized = ext === 'tsv' ? text.replace(/\t/g, ',') : text;
+            const imported = parseCsvToRows(normalized);
+            if (imported.length === 0) {
+              setImportErr('No rows found. Make sure your CSV/TSV has a header with: period,revenue,units,supplier,costPrice,staffExp');
+            } else {
+              setRows(imported);
+            }
+          } else if (ext === 'json') {
+            const parsed = JSON.parse(text);
+            if (Array.isArray(parsed)) setRows(parsed as Row[]);
+            else setImportErr('JSON must be an array of objects with the expected columns.');
+          } else if (ext === 'txt') {
+            // naive parse: numbers per line, period inferred as index
+            const lines = text.split(/\r?\n/).filter(Boolean);
+            const imported: Row[] = lines.map((line, i) => {
+              const nums = line.split(/[,\s]+/).map(n => Number(n));
+              return { period: String(i + 1), revenue: nums[0] || 0, units: nums[1] || 0, supplier: 'Unknown', costPrice: 0, staffExp: 0 };
+            });
+            setRows(imported);
+          }
+        } catch (err: any) {
+          setImportErr('Could not read the file. Try CSV/TSV/JSON or use Excel export.');
         }
-      } catch (err: any) {
-        setImportErr('Could not read the file. Try saving as CSV and uploading again.');
-      }
-    };
-    fr.readAsText(file);
+      };
+      fr.readAsText(file);
+    } else if (ext && willDoServer.includes(ext)) {
+      setImportErr('This file type will be parsed on the server in your dashboard (trial required).');
+      // TODO: send to /api/upload for server-side parsing once dashboard is live.
+    } else {
+      setImportErr('Unsupported file type. Try CSV/TSV/JSON or Excel export.');
+    }
+
     // Reset input value so re-uploading the same file triggers change
     e.target.value = '';
   }
 
-  // Compute table columns and totals
+  // Compute table totals
   const totals = useMemo(() => {
     const sum = (k: keyof Row) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
     return { revenue: sum('revenue'), units: sum('units'), staffExp: sum('staffExp') };
@@ -136,38 +177,109 @@ export default function HomePage() {
 
   return (
     <div className="font-inter min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900">
+      {/* Sticky Nav */}
+      <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-white/40">
+        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-500" />
+            <span className="font-semibold tracking-tight">Chartura</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            <a className="opacity-70 hover:opacity-100 transition" href="#why">Why</a>
+            <a className="opacity-70 hover:opacity-100 transition" href="#how">How</a>
+            <a className="opacity-70 hover:opacity-100 transition" href="#askura">Askura</a>
+            <a className="opacity-70 hover:opacity-100 transition" href="#showcase">Showcase</a>
+          </nav>
+          <button onClick={() => gateOr(() => fileRef.current?.click())} className="rounded-xl border border-slate-200 bg-white/70 px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow transition">
+            Start free trial
+          </button>
+        </div>
+      </header>
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_0%,rgba(14,165,233,0.12),transparent_60%)]" />
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+        <div className="mx-auto max-w-6xl px-4 py-20 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
             Confidence, not confusion.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg text-slate-600">
-            Turn messy spreadsheets into decisions in minutes. Beautiful, presentation‑ready visuals — no design work.
+            Turn messy spreadsheets into decisions in minutes. Import any file. Get instant insights, premium charts and AI answers.
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
-            <a href="#askura" className="rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 px-5 py-3 text-white font-medium shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition">
-              Try Askura
+            <button onClick={() => gateOr(() => fileRef.current?.click())} className="rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 px-5 py-3 text-white font-medium shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition">
+              Start free 7‑day trial
+            </button>
+            <a href="#how" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-medium hover:shadow-md transition">
+              See how it works
             </a>
-            <a href="#data" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-medium hover:shadow-md transition">
-              Import your data
-            </a>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto text-sm">
+            <div className="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm">
+              <div className="font-semibold">60s</div>
+              <div className="opacity-70">to first insight</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm">
+              <div className="font-semibold">No code</div>
+              <div className="opacity-70">just your data</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm">
+              <div className="font-semibold">Secure</div>
+              <div className="opacity-70">you control access</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm">
+              <div className="font-semibold">Export</div>
+              <div className="opacity-70">PNG & PDF ready</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Main content */}
       <main className="flex-1">
+        {/* Why */}
+        <section id="why" className="mx-auto max-w-6xl px-4 py-12">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center">Why Chartura</h2>
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {[
+              { title: 'Clarity first', desc: 'Readable charts, smart defaults, beautiful typography.' },
+              { title: 'Fast to value', desc: 'Upload. Ask. Decide. No dashboards to build.' },
+              { title: 'Private by design', desc: 'Your keys, your storage, your control.' },
+            ].map((f, i) => (
+              <div key={i} className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm">
+                <div className="text-base font-semibold">{f.title}</div>
+                <p className="mt-1 text-sm text-slate-600">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* How */}
+        <section id="how" className="mx-auto max-w-6xl px-4 py-2">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center">How it works</h2>
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {[
+              { title: '1. Import anything', desc: 'Excel, CSV, Google Sheets, PDFs, Word, PowerPoint — we handle it.' },
+              { title: '2. Ask anything', desc: 'AI answers with context from your tables and documents.' },
+              { title: '3. Share instantly', desc: 'Premium visuals ready for boardrooms — export in one click.' },
+            ].map((s, i) => (
+              <div key={i} className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm">
+                <div className="text-base font-semibold">{s.title}</div>
+                <p className="mt-1 text-sm text-slate-600">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Data import + table */}
-        <section id="data" className="mx-auto max-w-6xl px-4 py-8">
+        <section id="data" className="mx-auto max-w-6xl px-4 py-10">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h2 className="text-xl font-semibold">Your data</h2>
             <div className="flex items-center gap-2">
               <input
                 ref={fileRef}
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv,.tsv,.json,.txt,.xlsx,.xls,.pdf,.docx,.pptx,.pages,.numbers,.key"
                 onChange={onFileChange}
                 className="hidden"
               />
@@ -175,7 +287,7 @@ export default function HomePage() {
                 onClick={onPickFile}
                 className="rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 px-4 py-2 text-white text-sm font-medium shadow hover:opacity-95"
               >
-                Import CSV
+                Import file
               </button>
             </div>
           </div>
@@ -207,11 +319,11 @@ export default function HomePage() {
               <tfoot className="bg-slate-50">
                 <tr className="font-medium">
                   <td className="px-4 py-2">Totals</td>
-                  <td className="px-4 py-2">{totals.revenue.toLocaleString()}</td>
-                  <td className="px-4 py-2">{totals.units.toLocaleString()}</td>
+                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}</td>
+                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.units, 0).toLocaleString()}</td>
                   <td className="px-4 py-2">—</td>
                   <td className="px-4 py-2">—</td>
-                  <td className="px-4 py-2">{totals.staffExp.toLocaleString()}</td>
+                  <td className="px-4 py-2">{rows.reduce((s, r) => s + r.staffExp, 0).toLocaleString()}</td>
                 </tr>
               </tfoot>
             </table>
@@ -263,6 +375,14 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Trial modal */}
+      <TrialModal
+        open={showTrial}
+        onClose={() => setShowTrial(false)}
+        onStartTrial={startTrial}
+        onUseDemo={() => setShowTrial(false)}
+      />
     </div>
   );
 }
