@@ -192,28 +192,28 @@ export default function HomePage() {
       </header>
 
       {/* HERO (full viewport) */}
-      <section className="relative overflow-hidden min-h-[calc(100vh-64px)] flex items-center">
+      <section className="relative overflow-hidden min-h-[100svh] flex items-center">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900" />
         <div className="absolute -left-32 -top-32 w-[560px] h-[560px] rounded-full bg-gradient-to-tr from-violet-600/30 to-amber-400/20 blur-3xl" />
         <div className="absolute -right-24 -bottom-24 w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-indigo-600/30 to-cyan-400/20 blur-3xl" />
 
-        <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-2 gap-10 items-center">
+        <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-white">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight">
               Turn chaos into clarity.
             </h1>
-            <p className="mt-4 text-base md:text-lg text-slate-200">
+            <p className="mt-5 text-lg md:text-xl text-slate-200 max-w-xl">
               Upload any file — spreadsheets, slides, docs, PDFs. Get instant insights, premium charts and AI answers you can trust.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button onClick={() => gateOr(() => fileRef.current?.click())} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3 text-white font-medium shadow-lg hover:shadow-xl transition">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <button onClick={() => gateOr(() => fileRef.current?.click())} className="rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-3 text-white font-medium shadow-lg hover:shadow-xl transition">
                 Start free 7‑day trial
               </button>
-              <a href="#how" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-white font-medium hover:bg-white/10 transition">
+              <a href="#how" className="rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-white font-medium hover:bg-white/10 transition">
                 See how it works
               </a>
             </div>
-            <div className="mt-6 flex items-center gap-6 text-sm text-slate-300">
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-300">
               <div>• 60s to first insight</div>
               <div>• No code</div>
               <div>• Secure</div>
@@ -227,10 +227,10 @@ export default function HomePage() {
       </section>
 
       <main className="flex-1">
-        {/* WHY (distinct white section) */}
-        <section id="why" className="mx-auto max-w-7xl px-6 py-16">
-          <h2 className="text-3xl font-bold tracking-tight text-center">Why teams choose Chartura</h2>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+        {/* WHY */}
+        <section id="why" className="mx-auto max-w-7xl px-6 py-20">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center">Why teams choose Chartura</h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[
               { title: 'Clarity first', desc: 'Readable charts, smart defaults, and typography that earns trust.' },
               { title: 'Fast to value', desc: 'Upload. Ask. Decide. No dashboards to build, no formulas to remember.' },
@@ -244,11 +244,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* HOW (soft gray section) */}
+        {/* HOW */}
         <section id="how" className="bg-slate-50">
-          <div className="mx-auto max-w-7xl px-6 py-16">
-            <h2 className="text-3xl font-bold tracking-tight text-center">How it works</h2>
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
+          <div className="mx-auto max-w-7xl px-6 py-20">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center">How it works</h2>
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
               {[
                 { title: '1. Import anything', desc: 'Excel, CSV, Google Sheets, PDFs, Word, PowerPoint — we handle it.' },
                 { title: '2. Ask anything', desc: 'AI answers with context from your tables and documents.' },
@@ -263,8 +263,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* DATA (import + live table) */}
-        <section id="data" className="mx-auto max-w-7xl px-6 py-16">
+        {/* DATA */}
+        <section id="data" className="mx-auto max-w-7xl px-6 py-20">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h2 className="text-2xl font-semibold">Try it with your data</h2>
             <div className="flex items-center gap-2">
@@ -322,8 +322,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ASKURA CHAT (white) */}
-        <section id="askura" className="px-6 py-16 bg-white">
+        {/* ASKURA */}
+        <section id="askura" className="px-6 py-20 bg-white">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-semibold mb-4">Askura — Ask Your Data</h2>
             <div className="border rounded-2xl p-4 bg-white shadow-sm">
@@ -352,16 +352,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* PREMIUM SHOWCASE (soft gray) */}
+        {/* SHOWCASE */}
         <section id="showcase" className="bg-slate-50">
-          <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="mx-auto max-w-7xl px-6 py-20">
             <PremiumShowcase rows={rows} />
           </div>
         </section>
 
-        {/* PROOF BAND (dark) */}
+        {/* PROOF BAND */}
         <section className="bg-slate-950 text-slate-200">
-          <div className="mx-auto max-w-7xl px-6 py-14 grid md:grid-cols-3 gap-6">
+          <div className="mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-3 gap-6">
             {[
               { k: 'NPS 67', d: 'Loved by operators and leadership alike.' },
               { k: '~60s', d: 'to your first insight from any file.' },
@@ -378,7 +378,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white/70">
-        <div className="mx-auto max-w-7xl px-6 py-8 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-2">
+        <div className="mx-auto max-w-7xl px-6 py-10 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-2">
           <div>© {new Date().getFullYear()} Chartura. All rights reserved.</div>
           <div className="flex items-center gap-4">
             <a href="#privacy" className="hover:underline">Privacy</a>

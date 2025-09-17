@@ -1,74 +1,94 @@
 export default function SpreadsheetToDecision() {
-  const cell = (x:number,y:number,w=80,h=28,fill='#fff',stroke='#e5e7eb',text?:string, cls='') => (
+  // helper to draw a cell
+  const cell = (x:number,y:number,w=96,h=30,fill='#fff',stroke='#e5e7eb',text?:string, cls='') => (
     <g className={cls}>
-      <rect x={x} y={y} width={w} height={h} fill={fill} stroke={stroke}/>
-      {text && <text x={x+8} y={y+18} fontSize="11" fill="#334155">{text}</text>}
+      <rect x={x} y={y} width={w} height={h} fill={fill} stroke={stroke} rx={4}/>
+      {text && <text x={x+10} y={y+19} fontSize="12" fill="#334155">{text}</text>}
     </g>
   );
+
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <svg viewBox="0 0 960 300" className="w-full h-auto">
-        {/* Left: Messy sheet */}
+    <div className="w-full rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl ring-1 ring-white/10 backdrop-blur">
+      <svg viewBox="0 0 1280 520" className="w-full h-auto">
         <defs>
           <linearGradient id="mess" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#fda4af"/>
-            <stop offset="100%" stopColor="#fde68a"/>
+            <stop offset="0%" stopColor="#f43f5e"/>
+            <stop offset="100%" stopColor="#f59e0b"/>
           </linearGradient>
           <linearGradient id="clean" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#8b5cf6"/>
             <stop offset="100%" stopColor="#6366f1"/>
           </linearGradient>
+          <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="b"/>
+            <feOffset dy="2" in="b" result="o"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.22"/></feComponentTransfer>
+            <feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
         </defs>
 
-        <g transform="translate(10,20)">
-          <rect x="0" y="0" width="340" height="260" rx="12" fill="url(#mess)" opacity="0.12" />
-          <rect x="6" y="6" width="328" height="248" rx="10" fill="#fff" stroke="#e5e7eb"/>
+        {/* Left: messy spreadsheet */}
+        <g transform="translate(20,28)">
+          <rect x="0" y="0" width="480" height="464" rx="16" fill="url(#mess)" opacity="0.12" />
+          <rect x="8" y="8" width="464" height="448" rx="14" fill="#fff" stroke="#e5e7eb" filter="url(#s)"/>
           {/* headers */}
-          {cell(14, 18, 90, 26, '#f8fafc', '#e2e8f0', 'Period')}
-          {cell(104, 18, 90, 26, '#f8fafc', '#e2e8f0', 'Revenue?')}
-          {cell(194, 18, 90, 26, '#f8fafc', '#e2e8f0', 'Units/Qty')}
-          {cell(284, 18, 40, 26, '#f8fafc', '#e2e8f0', '...')}
+          {cell(18, 26, 140, 34, '#f8fafc', '#e2e8f0', 'Period')}
+          {cell(158,26, 140, 34, '#f8fafc', '#e2e8f0', 'Revenue?')}
+          {cell(298,26, 140, 34, '#f8fafc', '#e2e8f0', 'Units/Qty')}
           {/* messy rows */}
-          {cell(14, 44, 90, 26, '#fff', '#fee2e2', '2020')}
-          {cell(104,44, 90, 26, '#fff', '#fee2e2', '$ 300')}
-          {cell(194,44, 90, 26, '#fff', '#fee2e2', '—')}
-          {cell(14, 70, 90, 26, '#fff', '#fde68a', 'FY21')}
-          {cell(104,70, 90, 26, '#fff', '#fde68a', '350.00?')}
-          {cell(194,70, 90, 26, '#fff', '#fde68a', 'two‑sixty')}
-          {cell(14, 96, 90, 26, '#fff', '#fbcfe8', '2022 ')}
-          {cell(104,96, 90, 26, '#fff', '#fbcfe8', '≈ 400')}
-          {cell(194,96, 90, 26, '#fff', '#fbcfe8', '290')}
-          {/* notes */}
-          <text x="14" y="136" fontSize="11" fill="#ef4444">• Inconsistent headers</text>
-          <text x="14" y="154" fontSize="11" fill="#eab308">• Mixed formats</text>
-          <text x="14" y="172" fontSize="11" fill="#db2777">• Missing values</text>
+          {cell(18, 60, 140, 34, '#fff', '#fee2e2', '2020')}
+          {cell(158,60,140, 34, '#fff', '#fee2e2', '$ 300')}
+          {cell(298,60,140, 34, '#fff', '#fee2e2', '—')}
+
+          {cell(18, 94, 140, 34, '#fff', '#fde68a', 'FY21')}
+          {cell(158,94,140, 34, '#fff', '#fde68a', '350.00?')}
+          {cell(298,94,140, 34, '#fff', '#fde68a', 'two‑sixty')}
+
+          {cell(18, 128, 140, 34, '#fff', '#fbcfe8', '2022 ')}
+          {cell(158,128,140,34, '#fff', '#fbcfe8', '≈ 400')}
+          {cell(298,128,140,34, '#fff', '#fbcfe8', '290')}
+
+          <text x="18" y="178" fontSize="12" fill="#ef4444">• Inconsistent headers</text>
+          <text x="18" y="198" fontSize="12" fill="#eab308">• Mixed formats</text>
+          <text x="18" y="218" fontSize="12" fill="#db2777">• Missing values</text>
         </g>
 
-        {/* Arrow */}
-        <g transform="translate(360,110)">
-          <rect x="0" y="0" width="240" height="80" rx="40" fill="#111827" opacity="0.92"/>
-          <text x="120" y="48" textAnchor="middle" fontSize="13" fill="#e5e7eb">Clean • Normalize • Understand</text>
+        {/* Middle: pipeline pill */}
+        <g transform="translate(528,200)">
+          <rect x="0" y="0" width="224" height="120" rx="60" fill="#0b1220" opacity="0.96"/>
+          <text x="112" y="52" textAnchor="middle" fontSize="14" fill="#e5e7eb">Clean • Normalize</text>
+          <text x="112" y="74" textAnchor="middle" fontSize="14" fill="#e5e7eb">Understand • Answer</text>
         </g>
 
-        {/* Right: Clean insights */}
-        <g transform="translate(620,20)">
-          <rect x="0" y="0" width="330" height="260" rx="12" fill="url(#clean)" opacity="0.14" />
-          <rect x="6" y="6" width="318" height="248" rx="10" fill="#fff" stroke="#e5e7eb"/>
+        {/* Right: clean insights */}
+        <g transform="translate(776,28)">
+          <rect x="0" y="0" width="484" height="464" rx="16" fill="url(#clean)" opacity="0.14" />
+          <rect x="8" y="8" width="468" height="448" rx="14" fill="#fff" stroke="#e5e7eb" filter="url(#s)"/>
+
           {/* KPI cards */}
-          <rect x="16" y="16" width="130" height="52" rx="12" fill="#fff" stroke="#e5e7eb"/>
-          <text x="28" y="38" fontSize="11" fill="#64748b">Total Revenue</text>
-          <text x="28" y="56" fontSize="16" fontWeight="600" fill="#0f172a">$2.6m</text>
+          <g transform="translate(18,18)">
+            <rect x="0" y="0" width="220" height="72" rx="14" fill="#fff" stroke="#e5e7eb"/>
+            <text x="14" y="26" fontSize="12" fill="#64748b">Total Revenue</text>
+            <text x="14" y="52" fontSize="18" fontWeight="600" fill="#0f172a">$2.62m</text>
 
-          <rect x="170" y="16" width="130" height="52" rx="12" fill="#fff" stroke="#e5e7eb"/>
-          <text x="182" y="38" fontSize="11" fill="#64748b">Best Year</text>
-          <text x="182" y="56" fontSize="16" fontWeight="600" fill="#0f172a">2025</text>
+            <rect x="244" y="0" width="220" height="72" rx="14" fill="#fff" stroke="#e5e7eb"/>
+            <text x="258" y="26" fontSize="12" fill="#64748b">Best Year</text>
+            <text x="258" y="52" fontSize="18" fontWeight="600" fill="#0f172a">2025</text>
+          </g>
 
           {/* Line chart stub */}
-          <g transform="translate(16, 84)">
-            <rect x="0" y="0" width="284" height="140" rx="12" fill="#fff" stroke="#e5e7eb"/>
-            <path d="M8,120 Q60,80 112,92 T216,50 T276,70" stroke="url(#clean)" strokeWidth="3" fill="none"/>
-            <path d="M8,120 L276,120 L276,140 L8,140Z" fill="url(#clean)" opacity="0.16"/>
-            <text x="10" y="18" fontSize="11" fill="#64748b">Revenue over time</text>
+          <g transform="translate(18, 108)">
+            <rect x="0" y="0" width="446" height="182" rx="14" fill="#fff" stroke="#e5e7eb"/>
+            <text x="12" y="20" fontSize="12" fill="#64748b">Revenue over time</text>
+            <path d="M16,148 Q96,96 176,106 T336,60 T430,86" stroke="url(#clean)" strokeWidth="3" fill="none"/>
+            <path d="M16,148 L430,148 L430,168 L16,168Z" fill="url(#clean)" opacity="0.16"/>
+          </g>
+
+          {/* Bullets */}
+          <g transform="translate(18, 304)">
+            <text x="0" y="0" fontSize="12" fill="#0f172a">• Instant KPIs and trends</text>
+            <text x="0" y="22" fontSize="12" fill="#0f172a">• Ask a question — get a direct answer</text>
+            <text x="0" y="44" fontSize="12" fill="#0f172a">• Export presentation‑ready visuals</text>
           </g>
         </g>
       </svg>
