@@ -5,27 +5,7 @@ type Row = { period: string; revenue: number; units: number; supplier: string; c
 type Mode = 'line' | 'area' | 'bar' | 'scatter' | 'dual' | 'pie';
 type MetricKey = 'revenue' | 'units' | 'costPrice' | 'staffExp';
 
-export const config = {
-  api: { bodyParser: { sizeLimit: '1mb' } },
-};
-
-async function askOpenAI(apiKey: string, prompt: string, model: string) {
-  const r = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-    }),
-  });
-  const text = await r.text();
-  if (!r.ok) throw new Error(`OpenAI error (${r.status}) on ${model}: ${text}`);
-  return JSON.parse(text);
-}
+export const config = { api: { bodyParser: { sizeLimit: '1mb' } } };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
@@ -35,6 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       rows?: Row[];
       context?: { mode: Mode; yA: MetricKey; yB?: MetricKey; secondaryOn: boolean };
     };
+
     if (!question || !Array.isArray(rows) || !context) {
       return res.status(400).json({ error: 'Bad Request: missing "question", "rows", or "context".' });
     }
@@ -51,26 +32,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `Instructions: Provide a direct answer in 1–2 sentences. Include one numeric fact if helpful.`
     ].join('\n');
 
-    // Try a list of models, in order. If one fails, try the next.
-    const models = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'];
-    let answer: string | null = null;
-    let lastErr: any = null;
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2,
+      }),
+    });
 
-    for (const m of models) {
-      try {
-        const data = await askOpenAI(apiKey, prompt, m);
-        answer = data?.choices?.[0]?.message?.content?.trim() || null;
-        if (answer) break;
-        lastErr = new Error(`No answer content from ${m}`);
-      } catch (e: any) {
-        lastErr = e;
-      }
-    }
+    const text = await r.text();
+    if (!r.ok) return res.status(502).json({ error: `OpenAI error (${r.status}): ${text}` });
 
-    if (!answer) {
-      const msg = typeof lastErr?.message === 'string' ? lastErr.message : 'Unknown error contacting OpenAI.';
-      return res.status(502).json({ error: msg });
-    }
+    let data: any;
+    try { data = JSON.parse(text); } catch { return res.status(502).json({ error: 'Invalid JSON from OpenAI.' }); }
+
+    const answer = data?.choices?.[0]?.message?.content?.trim();
+    if (!answer) return res.status(502).json({ error: 'No answer from OpenAI.' });
 
     return res.status(200).json({ answer });
   } catch (e: any) {
