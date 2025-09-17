@@ -543,6 +543,7 @@ function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
     <section className="py-14 px-6 md:px-24 bg-white">
       <div className={`max-w-6xl mx-auto ${gated?'blur-sm pointer-events-none':''}`}>
         <h3 className="text-xl font-semibold mb-4">Insights</h3>
+        <div className="mb-6"><KPIRow rows={rows} tone="light" /></div>
         <div className="grid lg:grid-cols-3 gap-6">
           <Card title="Key takeaways" icon={<span>💡</span>}>
             <ul className="list-disc list-inside space-y-1">{bullets.map((b,i)=> <li key={i}>{b}</li>)}</ul>
@@ -560,6 +561,50 @@ function InsightsSection({ rows, gated }:{ rows: Row[]; gated:boolean }){
   );
 }
 
+
+/* =========================
+   Lightweight KPIs
+   ========================= */
+function computeKPIs(rows: Row[]) {
+  if (!rows || rows.length === 0) return { total: 0, yoy: 0, marginPct: 0, best: '-' };
+  const ordered = rows.slice().sort((a,b)=> (+a.period)-(+b.period));
+  const latest = ordered[ordered.length-1], prev = ordered[ordered.length-2] || latest;
+  const total = rows.reduce((s,r)=> s + r.revenue, 0);
+  const yoy = pct(latest.revenue, prev.revenue);
+  const margin = latest.revenue - (latest.costPrice * latest.units) - latest.staffExp;
+  const marginPct = latest.revenue ? (margin / latest.revenue) * 100 : 0;
+  const best = ordered.reduce((m,r)=> r.revenue > (m?.revenue ?? -Infinity) ? r : m, ordered[0]).period;
+  return { total, yoy, marginPct, best };
+}
+
+function KPIRow({ rows, tone='light' }:{ rows: Row[]; tone?: 'light'|'dark' }){
+  const { total, yoy, marginPct, best } = computeKPIs(rows);
+  const up = yoy >= 0;
+  const base = tone==='dark'
+    ? 'bg-white/10 border-white/10 text-white'
+    : 'bg-white border-slate-200 text-slate-900';
+  const sub = tone==='dark' ? 'text-white/70' : 'text-slate-500';
+  const tile = (label:string, value:string, hint?:string)=>(
+    <div className={`rounded-2xl px-5 py-4 shadow border ${base}`}>
+      <div className={`text-xs ${sub}`}>{label}</div>
+      <div className="text-xl font-semibold tracking-tight">{value}</div>
+      {hint && <div className={`text-xs mt-0.5 ${sub}`}>{hint}</div>}
+    </div>
+  );
+  return (
+    <div>
+      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mb-3`} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {tile('Total revenue', '£' + total.toLocaleString())}
+        {tile('YoY revenue', (up?'+':'−') + Math.abs(Math.round(yoy)) + '%', `${up?'▲':'▼'} vs previous year`)}
+        {tile('Latest margin', Math.round(marginPct) + '%')}
+        {tile('Best year', String(best))}
+      </div>
+      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mt-3`} />
+    </div>
+  );
+}
+
 /* =========================
    Hero + How It Works + Why
    ========================= */
@@ -574,10 +619,21 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
 
   const items = [
     { t:'Premium charts', d:'Beautiful visuals instantly.', c:(
-      <svg viewBox="0 0 320 160" className="w-full h-44">
+      <svg viewBox="0 0 320 160" className="w-full h-44 relative">
         <rect x="0" y="0" width="320" height="160" rx="12" fill="rgba(255,255,255,0.10)"/>
         <path d={miniPath} fill="none" stroke="#fff" strokeWidth="3"/>
         {miniPts.map((p,idx)=>(<circle key={idx} cx={p[0]} cy={p[1]} r={3} fill="#fff"/>))}
+        {/* shimmer */}
+        <defs>
+          <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="50%" stopColor="rgba(255,255,255,0.55)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
+        </defs>
+        <rect x="-320" y="0" width="320" height="160" fill="url(#shimmer)">
+          <animate attributeName="x" from="-320" to="320" dur="2.8s" repeatCount="indefinite" />
+        </rect>
       </svg>
     ) },
     { t:'Insights', d:'Snapshot of drivers, actions, risks.', c:(<InsightsMiniReal rows={rows}/> ) },
@@ -590,7 +646,7 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
   ];
   const s = items[i];
   return (
-    <section className="bg-gradient-to-tr from-[#0D1F2D] via-[#1F2A44] to-[#1ABC9C] text-white px-6 md:px-24 py-24">
+    <section className="bg-gradient-to-br from-rose-900 via-amber-800 to-stone-900 text-white px-6 md:px-24 py-24">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
         <div>
           <h1 className="text-5xl font-extrabold leading-tight">From spreadsheet to <span className="text-[#1ABC9C]">stakeholder-ready</span> in minutes.</h1>
@@ -611,6 +667,9 @@ function HeroIntro({ onCTABottom, rows, color }: { onCTABottom: () => void; rows
             ))}
             <button onClick={()=>setI(v=>wrap(v+1, items.length))} className="px-2 py-0.5 text-sm rounded bg-white/20 hover:bg-white/30">›</button>
           </div>
+                {/* hero KPIs */}
+        <div className="md:col-span-2 mt-6">
+          <KPIRow rows={rows} tone="dark" />
         </div>
       </div>
     </section>
@@ -658,7 +717,10 @@ function HowItWorks({ onTry, color }: { onTry: () => void; color:string }){
             </div>
           ))}
         </div>
-        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton></div>
+        <div className="mt-8"><ThemedButton color={color} onClick={onTry}>Try it</ThemedButton>        {/* hero KPIs */}
+        <div className="md:col-span-2 mt-6">
+          <KPIRow rows={rows} tone="dark" />
+        </div>
       </div>
     </section>
   );
@@ -684,7 +746,10 @@ function WhySection(){
             </div>
           ))}
         </div>
-        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.</div>
+        <div className="mt-6 text-xs text-gray-500">*We may collect anonymous usage stats (e.g., feature clicks) to improve Chartura — never the content of your files.        {/* hero KPIs */}
+        <div className="md:col-span-2 mt-6">
+          <KPIRow rows={rows} tone="dark" />
+        </div>
       </div>
     </section>
   );
