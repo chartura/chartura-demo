@@ -35,14 +35,14 @@ export default function TrialModal({ open, onClose, onStartTrial, onUseDemo }: T
         <div className="mt-6 flex flex-col sm:flex-row gap-2">
           <button
             onClick={onStartTrial}
-            className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-white px-4 py-2 font-medium hover:opacity-95"
+            className="flex-1 btn btn-primary w-full"
           >
             Start free trial
           </button>
           {onUseDemo && (
             <button
               onClick={onUseDemo}
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium hover:shadow-sm"
+              className="flex-1 btn w-full border border-black/10 bg-white"
             >
               Continue with demo data
             </button>

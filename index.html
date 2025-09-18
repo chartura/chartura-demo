@@ -4,10 +4,41 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chartura</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta name="description" content="Turn messy spreadsheets into investor-ready slides, live executive dashboards and plain‑English answers — in minutes." />
+<meta property="og:title" content="Chartura — Make your data impossible to ignore" />
+<meta property="og:description" content="Turn messy spreadsheets into investor-ready slides, live executive dashboards and plain‑English answers — in minutes." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="/vite.svg" />
+    <title>Chartura — Make your data impossible to ignore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind = { config: {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            gold: '#D4AF37',
+            ink: '#0B0D12',
+            night: '#0E1117'
+          }
+        },
+        fontFamily: {
+          sans: ['Inter','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Noto Sans','Ubuntu','Cantarell','Helvetica Neue','Arial','sans-serif'],
+          display: ['Playfair Display','Georgia','serif']
+        },
+        boxShadow: {
+          subtle: '0 8px 30px rgba(0,0,0,0.08)',
+          premium: '0 20px 50px rgba(0,0,0,0.25)'
+        }
+      }
+    }
+  }};
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-gray-50">
+  <body class="bg-gray-50 font-sans text-neutral-900 antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

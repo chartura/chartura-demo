@@ -1,3 +1,31 @@
+
+/* Chartura premium base */
+:root { color-scheme: light; }
+html, body, #root { height: 100%; }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { background: #D4AF37; color: #0B0D12; }
+
+/* Buttons */
+.btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition;
+}
+.btn-primary {
+  @apply bg-brand-gold text-black hover:brightness-110 shadow-premium;
+}
+.btn-ghost {
+  @apply border border-white/20 bg-white/5 text-white hover:bg-white/10;
+}
+.container {
+  @apply max-w-7xl mx-auto px-6 md:px-12 lg:px-16;
+}
+.card {
+  @apply rounded-2xl border border-black/5 bg-white shadow-subtle;
+}
+.card-dark {
+  @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur;
+}
+
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
