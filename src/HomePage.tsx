@@ -25,6 +25,35 @@ function defaultRows(): Row[] {
   ];
 }
 
+// CSV/TSV/JSON/TXT import (client-side)
+function parseCsvToRows(csv: string): Row[] {
+  const lines = csv.split(/\r?\n/).filter(Boolean);
+  if (lines.length === 0) return [];
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const idx = (name: string) => headers.indexOf(name);
+  const iPeriod = idx('period');
+  const iRevenue = idx('revenue');
+  const iUnits = idx('units');
+  const iSupplier = idx('supplier');
+  const iCost = idx('costprice');
+  const iStaff = idx('staffexp');
+
+  const rows: Row[] = [];
+  for (let li = 1; li < lines.length; li++) {
+    const cols = lines[li].split(',').map(c => c.trim());
+    if (!cols.length) continue;
+    rows.push({
+      period: String(cols[iPeriod] ?? ''),
+      revenue: Number(cols[iRevenue] ?? 0),
+      units: Number(cols[iUnits] ?? 0),
+      supplier: String(cols[iSupplier] ?? ''),
+      costPrice: Number(cols[iCost] ?? 0),
+      staffExp: Number(cols[iStaff] ?? 0),
+    });
+  }
+  return rows.filter(r => r.period);
+}
+
 async function askOpenAI(
   _apiKey: string,
   prompt: string,
@@ -49,6 +78,9 @@ async function askOpenAI(
   }
 }
 
+/* =========================
+   KPIs
+   ========================= */
 function pct(curr: number, prev: number) {
   if (!prev) return 0;
   return ((curr - prev) / prev) * 100;
@@ -78,19 +110,20 @@ function KPIRow({ rows, tone='light' }:{ rows: Row[]; tone?: 'light'|'dark' }){
   const yoyStr = `${up? '▲':'▼'} ${Math.abs(Math.round(yoyRevenue))}% vs last year`;
   return (
     <div>
-      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mb-3`} />
+      <div className={`${tone==='dark' ? 'from-white/0 via-white/40 to-white/0' : 'from-transparent via-slate-300/60 to-transparent'} h-px bg-gradient-to-r mb-3`} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 place-items-center">
         {tile("Total revenue", "£"+ totalRevenue.toLocaleString())}
         {tile("YoY revenue", (up?'+' :'−') + Math.abs(Math.round(yoyRevenue)) + "%", yoyStr)}
         {tile("Latest margin", Math.round(marginPctLatest) + "%")}
         {tile("Best year", String(bestYear))}
       </div>
-      <div className={`${tone==='dark' ? 'from-white/0 via-amber-300/30 to-white/0' : 'from-transparent via-amber-400/40 to-transparent'} h-px bg-gradient-to-r mt-3`} />
+      <div className={`${tone==='dark' ? 'from-white/0 via-white/40 to-white/0' : 'from-transparent via-slate-300/60 to-transparent'} h-px bg-gradient-to-r mt-3`} />
     </div>
   );
 }
 
 export default function HomePage() {
+  // Live rows used by "Try it" table and bottom KPIs
   const [rows, setRows] = useState<Row[]>(defaultRows());
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([
@@ -174,7 +207,7 @@ export default function HomePage() {
     return { revenue: sum('revenue'), units: sum('units'), staffExp: sum('staffExp') };
   }, [rows]);
 
-  // ----- HERO (original colors) -----
+  // ----- Static demo data for hero visuals (kept independent from uploads) -----
   const staticRows: Row[] = [
     { period:'2020', revenue:300, units:240, supplier:'Northstar', costPrice:0.88, staffExp:40 },
     { period:'2021', revenue:350, units:260, supplier:'Northstar', costPrice:0.90, staffExp:44 },
@@ -208,7 +241,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* HERO */}
+      {/* HERO (static demo) */}
       <section className="bg-gradient-to-tr from-[#0D1F2D] via-[#1F2A44] to-[#1ABC9C] text-white px-6 md:px-24 py-24">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
@@ -250,6 +283,9 @@ export default function HomePage() {
                   <animate attributeName="x" from="-320" to="320" dur="2.8s" repeatCount="indefinite" />
                 </rect>
               </svg>
+              <div className="absolute -bottom-3 left-4 text-[11px] tracking-wide uppercase text-white/60 bg-black/20 rounded px-2 py-0.5">
+                Demo data
+              </div>
             </div>
           </div>
           <div className="md:col-span-2 mt-8">
